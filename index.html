@@ -162,6 +162,15 @@
   .eq.regen .lecho{animation:latido 1.8s ease-in-out infinite;}
   @keyframes latido{0%,100%{opacity:1} 50%{opacity:.35}}
   @media (prefers-reduced-motion: reduce){ .eq.regen .lecho{animation:none;} }
+  /* Equipo con fallo o tablero caído: se ve, y el impulsor no gira. */
+  .eq.falla{opacity:1;}
+  .eq.falla .body{stroke:var(--bad);}
+  .eq.falla .imp{animation:none;}
+  /* Válvulas con estado real */
+  .valve.viva{opacity:1;}
+  .valve.abierta path{fill:var(--ok); stroke:var(--ok);}
+  .valve.cerrada path{fill:var(--panel2); stroke:var(--dim);}
+  .valve.falla path{fill:var(--bad); stroke:var(--bad);}
   .svlbl{fill:var(--dim); font-size:8px; text-anchor:middle; paint-order:stroke;
          stroke:var(--panel2); stroke-width:3px; stroke-linejoin:round;}
   .eq.run .svlbl{fill:var(--accent); font-weight:700;}
@@ -522,6 +531,62 @@ const PASOS_SF={0:['parado','en reposo'], 11:['entrando','entrando a servicio'],
   24:['regenera','regenerando · purga'],       25:['regenera','regenerando · enjuague'],
   26:['regenera','regenerando · enjuague final'], 27:['regenera','regeneración terminada']};
 
+/* ---- Palabras de estado UMOT / UVLV ----------------------------------
+   Cada equipo es un struct de 16 Bool = 1 palabra. El orden de miembros
+   está verificado contra "Tipos de datos PLC Principal.pdf":
+     UMOT: B1 B2 B3 CMD Runing FLT X1 X2 B4 B5 Bad RMT OP_AM OP_Start RDY ON
+     UVLV: B1 CMD1 CMD2 CMD OPN FLT X1 X2 B2 B3 Bad RMT OP_AM OP_Start RDY ON
+   El miembro m vive en el byte base+m/8, bit m%8. Leída la palabra en
+   orden Siemens (byte alto primero), eso cae en el bit (m<8 ? m+8 : m-8).
+   No deducir estos índices a ojo: ya dieron una falsa alarma en sept. */
+const M={CMD:3, Runing:4, OPN:4, FLT:5, Bad:10, RMT:11, OP_AM:12, OP_Start:13, RDY:14, ON:15};
+const bitDe=(w,m)=>((w >> (m<8 ? m+8 : m-8)) & 1)===1;
+
+/* clave publicada -> id del dibujo que enciende. A y B al mismo símbolo. */
+const EQUIPOS={
+  BCE401A:'bce401', BCE401B:'bce401',
+  BCE504:'bce504',  BCE505:'bce505',
+  BCE405A:'bce405', BCE405B:'bce405',
+  BCE404A:'bce404', BCE404B:'bce404',
+  BCE406:'bce406',  BCE506:'bce506',
+  BDO402A:'dpNah',  BDO402B:'dpNah',
+  BDO501A:'dp1a',   BDO501B:'dp1a',
+  BDO502A:'dp1b',   BDO502B:'dp1b',
+  BDO503A:'dp1c',   BDO503B:'dp1c',
+  BDO407:'bdoA',    BDO408:'bdoB'
+};
+const VALVULAS={FCV502:'FCV502'};
+/* Equipos que ya traen su bit real: dejan de depender del paso de RO1. */
+const conDatoReal=new Set();
+
+function pintaEquipos(o){
+  const est={};
+  for(const k in EQUIPOS){
+    if(o[k]===undefined) continue;
+    const w=Number(o[k]), id=EQUIPOS[k];
+    const e=est[id] || (est[id]={marcha:false,falla:false});
+    if(bitDe(w,M.Runing)) e.marcha=true;
+    if(bitDe(w,M.FLT)||bitDe(w,M.Bad)) e.falla=true;
+  }
+  for(const id in est){
+    const g=document.getElementById('eq_'+id); if(!g) continue;
+    conDatoReal.add(id);
+    g.classList.toggle('run',est[id].marcha);
+    g.classList.toggle('falla',est[id].falla);
+  }
+}
+function pintaValvulas(o){
+  for(const k in VALVULAS){
+    if(o[k]===undefined) continue;
+    const w=Number(o[k]), g=document.getElementById('vl_'+VALVULAS[k]); if(!g) continue;
+    const falla=bitDe(w,M.FLT)||bitDe(w,M.Bad), abierta=bitDe(w,M.OPN);
+    g.classList.add('viva');
+    g.classList.toggle('falla',falla);
+    g.classList.toggle('abierta',abierta&&!falla);
+    g.classList.toggle('cerrada',!abierta&&!falla);
+  }
+}
+
 function pintaFiltros(e){
   const resumen=[];
   [['F1','s1','sd1','sb1','01'],['F2','s2','sd2','sb2','02'],['F3','s3','sd3','sb3','03']]
@@ -601,6 +666,7 @@ function pinta(bruto){
   }
   marcaSiRaro('PH501', v=>v<0||v>14);
   marcaSiRaro('PH506', v=>v<0||v>14);
+  pintaEquipos(obj); pintaValvulas(obj);
   if(obj.step!==undefined) pintaEstado(obj);
   ultimoDato=Date.now();
 }
@@ -619,7 +685,11 @@ function pintaEstado(e){
 
   const enMarcha = paso>=12 && paso<=15;
   RUTA_RO1.forEach(id=>{const p=document.getElementById('pp_'+id); if(p) p.classList.toggle('on',enMarcha);});
-  EQ_RO1.forEach(id=>{const g=document.getElementById('eq_'+id); if(g) g.classList.toggle('run',enMarcha);});
+  /* Un equipo que ya manda su bit Runing manda sobre la deducción por paso. */
+  EQ_RO1.forEach(id=>{
+    if(conDatoReal.has(id)) return;
+    const g=document.getElementById('eq_'+id); if(g) g.classList.toggle('run',enMarcha);
+  });
 
   pintaFiltros(e);
 
