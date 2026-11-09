@@ -75,10 +75,23 @@
   button.sec{background:transparent; color:var(--dim); border:1px solid var(--line);}
   .aviso{font-size:11.5px; color:var(--dim); width:100%; margin-top:2px;}
 
-  .alarma{display:none; padding:11px 20px; background:#FCEBEB; color:#A32D2D;
-          border-bottom:1px solid #E8C4C4; font-weight:600; font-size:14px;}
-  .alarma.ver{display:block;}
-  :root[data-theme="dark"] .alarma, :root:not([data-theme="light"]) .alarma{background:#3A1E1E; color:#E8736C; border-color:#4A2A2A;}
+  /* La alarma va en la misma fila que Secuencia y Estado, con su mismo aspecto. */
+  .linea{display:flex; align-items:center; gap:9px; font-size:12px; color:var(--dim);
+         text-transform:uppercase; letter-spacing:.6px; font-weight:600;}
+  .linea::before{content:'\25CF'; font-size:9px; letter-spacing:0; color:var(--ok);}
+  .linea .res{margin-left:auto; font-family:Consolas,monospace; font-size:11.5px;
+         text-transform:none; letter-spacing:0; font-weight:400; color:var(--ok); opacity:.95;
+         text-align:right;}
+  .caja.alarma.ver{background:#FCEBEB; border-color:#E8C4C4;}
+  .caja.alarma.ver .linea, .caja.alarma.ver .linea::before{color:#A32D2D;}
+  .caja.alarma.ver .res{color:#A32D2D; font-weight:700; opacity:1;}
+  :root[data-theme="dark"] .caja.alarma.ver, :root:not([data-theme="light"]) .caja.alarma.ver{
+         background:#3A1E1E; border-color:#5A3030;}
+  :root[data-theme="dark"] .caja.alarma.ver .linea, :root[data-theme="dark"] .caja.alarma.ver .linea::before,
+  :root[data-theme="dark"] .caja.alarma.ver .res,
+  :root:not([data-theme="light"]) .caja.alarma.ver .linea,
+  :root:not([data-theme="light"]) .caja.alarma.ver .linea::before,
+  :root:not([data-theme="light"]) .caja.alarma.ver .res{color:#E8736C;}
 
   main{padding:14px 20px 40px;}
 
@@ -91,8 +104,8 @@
 
   main > *{margin-bottom:12px;}
   main > *:last-child{margin-bottom:0;}
-  .par{display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start;}
-  @media (max-width:820px){ .par{grid-template-columns:1fr;} }
+  .par{display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:12px; align-items:start;}
+  @media (max-width:1000px){ .par{grid-template-columns:1fr;} }
   .par > details{margin:0;}
   /* El paso activo se ve en el título; la lista entera solo si la abres. */
   #resPaso{color:var(--accent); font-weight:700;}
@@ -173,6 +186,10 @@
   .valve{opacity:.6;}
   .valve path{stroke-width:1.6; fill:var(--panel2); stroke:var(--dim);}
   .valve text{fill:var(--dim); font-size:8.5px; font-family:Consolas,monospace; text-anchor:middle;}
+  .valve.mini{cursor:help;}
+  .valve.mini path{stroke-width:1.2;}
+  .valve.mini .num{font-size:7.5px; font-weight:700; paint-order:stroke;
+                   stroke:var(--panel); stroke-width:2.5px; stroke-linejoin:round;}
 
   footer{padding:14px 20px; color:var(--dim); font-size:11.5px; text-align:center;}
 </style>
@@ -203,12 +220,13 @@
 </div>
 </details>
 
-<div class="alarma" id="alarma"></div>
-
 <main>
   <div class="tira" id="tira"></div>
 
   <div class="par">
+    <div class="caja alarma" id="alarma">
+      <div class="linea"><span>Alarmas</span><span class="res" id="alarmaTxt">sin alarmas activas</span></div>
+    </div>
     <details class="plegable caja" id="boxPasos">
       <summary><span>Secuencia RO1</span><span class="res" id="resPaso">sin datos</span></summary>
       <div class="pasos" id="pasos"></div>
@@ -379,9 +397,9 @@ pipe('p1',[[130,150],[186,150]],'feed');
 pipe('p2',[[222,150],[302,150]],'feed');
 pipe('dqn',[[245,62],[245,150]],'dos',1);
 pipe('sin1',[[302,150],[302,78],[535,78]],'feed');
-pipe('sd1',[[330,78],[330,97]],'feed'); pipe('sd2',[[380,78],[380,97]],'feed'); pipe('sd3',[[430,78],[430,97]],'feed');
-pipe('sb1',[[330,197],[330,218]],'feed'); pipe('sb2',[[380,197],[380,218]],'feed'); pipe('sb3',[[430,197],[430,218]],'feed');
-pipe('sout',[[330,218],[535,218]],'feed');
+pipe('sd1',[[334,78],[334,97]],'feed'); pipe('sd2',[[408,78],[408,97]],'feed'); pipe('sd3',[[482,78],[482,97]],'feed');
+pipe('sb1',[[334,197],[334,218]],'feed'); pipe('sb2',[[408,197],[408,218]],'feed'); pipe('sb3',[[482,197],[482,218]],'feed');
+pipe('sout',[[334,218],[535,218]],'feed');
 pipe('pout',[[535,218],[558,218],[558,150],[600,150]],'feed');
 pipe('p34',[[600,150],[772,150]],'feed');
 pipe('dq1',[[720,62],[720,150]],'dos',1);
@@ -411,7 +429,7 @@ pipe('cipRet',[[1150,171],[1150,260],[530,260],[530,362]],'cip');
 /* Regeneración de resina */
 pipe('b1',[[1045,415],[1080,415]],'brine');
 pipe('b2',[[1112,415],[1140,415],[1140,272],[470,272],[470,218]],'brine');
-pipe('regenWaste',[[430,218],[430,240],[327,240],[327,568],[1285,568],[1285,472]],'drain');
+pipe('regenWaste',[[512,218],[512,262],[327,262],[327,568],[1285,568],[1285,472]],'drain');
 pipe('r1',[[1330,415],[1380,415]],'rech');
 pipe('r2',[[1412,415],[1455,415]],'rech');
 
@@ -419,9 +437,9 @@ pipe('r2',[[1412,415],[1455,415]],'rech');
 tank('taq401',30,88,100,112,'TAQ-4.01','Permeado MBR',0.68);
 pump('bce401',202,150,'BCE-4.01 A/B','Alimentación');
 dospump('dpNah',245,45,'BDO-4.02 NaHSO₃');
-const g1=softener('s1',330,97,''), g2=softener('s2',380,97,''), g3=softener('s3',430,97,'');
-txt(330,131,'01','eqsub',g1); txt(380,131,'02','eqsub',g2); txt(430,131,'03','eqsub',g3);
-txt(380,58,'SVZ-4.01 / 4.02 / 4.03 — SUAVIZADORES (2+1)','eqlbl',g2);
+const g1=softener('s1',334,97,''), g2=softener('s2',408,97,''), g3=softener('s3',482,97,'');
+txt(334,131,'01','eqsub',g1); txt(408,131,'02','eqsub',g2); txt(482,131,'03','eqsub',g3);
+txt(408,58,'SVZ-4.01 / 4.02 / 4.03 — SUAVIZADORES (2+1) · FCV-4.01…21','eqlbl',g2);
 filterC('ftp501a',616,150,''); filterC('ftp501b',650,150,'FTP-5.01 A/B');
 dospump('dp1a',690,45,'HCl'); dospump('dp1b',720,28,'Antiincr.'); dospump('dp1c',750,45,'Biocida');
 pump('bce504',790,150,'BCE-5.04 · VFD','Alta presión RO1');
@@ -470,6 +488,34 @@ instr('LT-4.04',1205,326,1240,372,'m');
 instr('FI-4.04',1365,360,1365,415,'L/h');
 
 /* ---------------- VÁLVULAS ---------------- */
+/* Panel de válvulas de cada suavizador, igual que en el HMI: columna
+   izquierda afluente y enjuague superior, columna derecha los drenajes,
+   el efluente y el enjuague inferior, y el venteo arriba. El número es la
+   posición en el grupo; el tag completo sale al pasar el ratón. */
+const VALV_SVZ=['Válvula de afluente','Válvula de drenaje superior','Válvula de enjuague superior',
+                'Válvula de drenaje inferior','Válvula de efluente','Válvula de enjuague inferior',
+                'Válvula de venteo'];
+const POS_SVZ=[[-30,112,1],[30,112,2],[-30,140,3],[30,140,4],[30,168,5],[30,196,6],[0,88,7]];
+function panelValvulas(cx,base,svz){
+  POS_SVZ.forEach(([dx,y,n])=>{
+    const tag='FCV-4.'+String(base+n-1).padStart(2,'0');
+    const g=el('g',{class:'valve mini',id:'vl_'+tag.replace(/\W/g,'')},layers.valves);
+    const x=cx+dx, s=5;
+    el('path',{d:`M${x-s},${y-s} L${x+s},${y+s} L${x-s},${y+s} L${x+s},${y-s} Z`},g);
+    const d=txt(n===7? x+11 : x, n===7? y+3 : y-9, String(n),'num',g);
+    if(n===7) d.setAttribute('text-anchor','start');
+    const ti=document.createElementNS(NS,'title');
+    ti.textContent=tag+' · '+VALV_SVZ[n-1]+' de '+svz;
+    g.appendChild(ti);
+  });
+}
+panelValvulas(334,1,'SVZ-4.01');
+panelValvulas(408,8,'SVZ-4.02');
+panelValvulas(482,15,'SVZ-4.03');
+txt(300,243,'1 afluente · 2 dren. sup · 3 enj. sup · 4 dren. inf · '+
+            '5 efluente · 6 enj. inf · 7 venteo','arrowlbl',layers.valves)
+  .setAttribute('text-anchor','start');
+
 valve('FCV501',1240,190,'FCV-5.01',true);
 valve('FCV502',1302,205,'FCV-5.02',true);
 valve('VA501',1200,250,'VA-5.01',false);
@@ -587,12 +633,15 @@ function pintaEstado(e){
 }
 
 function pintaAlarma(a){
-  const d=document.getElementById('alarma');
+  const d=document.getElementById('alarma'), t=document.getElementById('alarmaTxt');
   if(a && a.activa){
     const causa=a.texto||CAUSAS[a.codigo]||('código '+a.codigo);
-    d.innerHTML=`<b>⚠ ${causa}</b> — en el paso ${a.paso}${a.ts?' · '+a.ts:''}`;
+    t.textContent='⚠ '+causa+' · paso '+a.paso+(a.ts?' · '+a.ts:'');
     d.classList.add('ver');
-  } else d.classList.remove('ver');
+  } else {
+    t.textContent='sin alarmas activas';
+    d.classList.remove('ver');
+  }
 }
 
 /* Un dato viejo en pantalla engaña más que no tener dato. */
