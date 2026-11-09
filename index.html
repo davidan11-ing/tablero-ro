@@ -298,7 +298,17 @@ const CAUSAS={1:'Nivel bajo LT401',2:'Nivel alto LT507',3:'Equipos no listos',4:
 let ultimoDato=0;
 const valores={};
 
-function pinta(obj){
+/* El CBOX publica las claves con el nombre del dispositivo delante
+   (PLC_RO_FT501). Aquí se lo quitamos para no tener que editar trece
+   celdas en el equipo cada vez que cambie algo. */
+function normaliza(obj){
+  const out={};
+  for(const k in obj) out[k.replace(/^PLC_RO_/, '')] = obj[k];
+  return out;
+}
+
+function pinta(bruto){
+  const obj = normaliza(bruto);
   for(const k in obj){
     if(k==='ts') continue;
     valores[k]=obj[k];
@@ -318,6 +328,8 @@ function pinta(obj){
   // pH imposible: lo marcamos en vez de fingir que es un dato bueno
   marcaSiRaro('PH501', v=>v<0||v>14);
   marcaSiRaro('PH506', v=>v<0||v>14);
+  /* El CBOX publica el estado en el mismo mensaje, no en un tópico aparte. */
+  if(obj.step!==undefined) pintaEstado(obj);
   ultimoDato=Date.now();
 }
 function marcaSiRaro(tag,fn){
@@ -326,12 +338,17 @@ function marcaSiRaro(tag,fn){
   g.classList.toggle('alerta', typeof v==='number' && fn(v));
 }
 
+/* El CBOX manda el estado dentro del mismo mensaje de proceso, así que
+   esta función tiene que funcionar con lo que haya: puede faltar casi todo. */
 function pintaEstado(e){
+  if(e.step===undefined) return;
+  const paso = Number(e.step);
+
   document.querySelectorAll('.paso').forEach(p=>p.classList.remove('act'));
-  const act=document.getElementById('paso_'+e.step);
+  const act=document.getElementById('paso_'+paso);
   if(act) act.classList.add('act');
 
-  const enMarcha = e.step>=12 && e.step<=15;
+  const enMarcha = paso>=12 && paso<=15;
   ['eq_BCE504','eq_BCE505','eq_RO11','eq_RO12'].forEach(id=>{
     const g=document.getElementById(id); if(g) g.classList.toggle('run', enMarcha);
   });
@@ -339,12 +356,22 @@ function pintaEstado(e){
     const p=document.getElementById(id); if(p) p.classList.toggle('on', enMarcha);
   });
 
-  const horas=Math.floor((e.run_min||0)/60), mins=(e.run_min||0)%60;
-  document.getElementById('estadoLista').innerHTML=`
-    <div class="dato"><span class="e">Paso</span><span class="v">${e.step} · ${e.step_txt||''}</span></div>
-    <div class="dato"><span class="e">Tiempo de marcha</span><span class="v">${horas} h ${mins} min</span></div>
-    <div class="dato"><span class="e">Comando</span><span class="v">${e.cmd}</span></div>
-    <div class="dato"><span class="e">Filtros 1/2/3</span><span class="v">${e.F1} / ${e.F2} / ${e.F3}</span></div>`;
+  const nombre = e.step_txt || (PASOS.find(p=>p[0]===paso)||[,''])[1] || '';
+  const filas = [['Paso', paso + (nombre? ' · '+nombre : '')]];
+
+  if(e.run_min!==undefined){
+    const h=Math.floor(e.run_min/60), m=e.run_min%60;
+    filas.push(['Tiempo de marcha', h+' h '+m+' min']);
+  }
+  if(e.cmd!==undefined) filas.push(['Comando', e.cmd]);
+  if(e.F1!==undefined)  filas.push(['Filtros 1/2/3', `${e.F1} / ${e.F2} / ${e.F3}`]);
+  /* 'codigo' es la causa del ÚLTIMO paro, no una alarma activa: se informa,
+     no se pinta en rojo. */
+  if(e.codigo!==undefined && Number(e.codigo)>0)
+    filas.push(['Último paro', CAUSAS[Number(e.codigo)] || ('código '+e.codigo)]);
+
+  document.getElementById('estadoLista').innerHTML =
+    filas.map(([k,v])=>`<div class="dato"><span class="e">${k}</span><span class="v">${v}</span></div>`).join('');
 }
 
 function pintaAlarma(a){
@@ -403,9 +430,9 @@ btn.onclick=()=>{
   cliente.on('close',()=>{ if(cliente) estado('off','desconectado'); });
   cliente.on('message',(t,p)=>{
     let d; try{ d=JSON.parse(p.toString()); }catch(e){ return; }
-    if(t.endsWith('/proceso')) pinta(d);
-    else if(t.endsWith('/estado')) pintaEstado(d);
-    else if(t.endsWith('/alarma')) pintaAlarma(d);
+    if(t.endsWith('/alarma')) pintaAlarma(normaliza(d));
+    else if(t.endsWith('/estado')) pintaEstado(normaliza(d));
+    else pinta(d);   // cualquier otro tópico se trata como datos de proceso
   });
 };
 
