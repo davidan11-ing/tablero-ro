@@ -144,13 +144,20 @@
          font-family:Consolas,monospace; font-variant-numeric:tabular-nums;}
   .liquid{opacity:.85;}
 
-  .instr{opacity:.55;}
+  /* Instrumento = burbuja + cápsula del valor, pegadas y con fondo opaco,
+     para que se lean como un solo bloque aunque pasen tuberías por detrás. */
+  .instr{opacity:.6;}
   .instr.vivo{opacity:1;}
-  .instr circle{fill:var(--panel); stroke:var(--trazo); stroke-width:1.4;}
-  .instr text{fill:var(--txt); font-size:9px; font-weight:700; text-anchor:middle; font-family:Consolas,monospace;}
-  .instr .val{fill:var(--accent); font-size:12px;}
-  .instr .uni{fill:var(--dim); font-size:9px; font-weight:400;}
-  .instr.alerta circle{stroke:var(--bad); stroke-width:2.4;}
+  .instr .burbuja{fill:var(--panel); stroke:var(--trazo); stroke-width:1.4;}
+  .instr .tg{fill:var(--txt); font-size:9px; font-weight:700; text-anchor:middle; font-family:Consolas,monospace;}
+  .instr .cap{display:none;}
+  .instr.vivo .cap{display:block;}
+  .instr .capbg{fill:var(--panel); stroke:var(--accent); stroke-width:1.3;}
+  .instr .val{fill:var(--accent); font-size:11.5px; font-weight:700; text-anchor:middle;
+              font-family:Consolas,monospace; font-variant-numeric:tabular-nums;}
+  .instr .uni{fill:var(--dim); font-size:8.5px; font-weight:400;}
+  .instr.alerta .burbuja{stroke:var(--bad); stroke-width:2.4;}
+  .instr.alerta .capbg{stroke:var(--bad);}
   .instr.alerta .val{fill:var(--bad);}
   .leader{stroke:var(--dim); stroke-width:1; stroke-dasharray:2 3; fill:none; opacity:.7;}
 
@@ -299,17 +306,36 @@ function hx(id,cx,cy,label,sub){
   if(sub) txt(cx,cy+50,sub,'eqsub',g);
   return g;
 }
-/* Instrumento ISA, con hueco para el valor en vivo debajo */
+/* Instrumento ISA: burbuja con el tag y, colgando de ella, la cápsula
+   del valor. La cápsula solo aparece cuando llega un dato real, y su
+   fondo es opaco para que no se confunda con lo que pase por detrás. */
 function instr(tag,x,y,lx,ly,unidad){
   const id='in_'+tag.replace(/[^A-Za-z0-9]/g,'');
   const g=el('g',{class:'instr',id},layers.instr);
   if(lx!==null) el('path',{d:`M${x},${y} L${lx},${ly}`,class:'leader'},g);
-  el('circle',{cx:x,cy:y,r:14},g);
+  const cap=el('g',{class:'cap'},g);
+  el('rect',{x:x-26,y:y+13,width:52,height:17,rx:8.5,class:'capbg'},cap);
+  txt(x,y+25.5,'','val',cap);
+  el('circle',{cx:x,cy:y,r:14,class:'burbuja'},g);
   const p=tag.split('-');
-  txt(x,y-1,p[0],'',g); txt(x,y+9,p[1]||'','',g);
-  txt(x,y+28,'','val',g);
-  if(unidad) txt(x,y+38,unidad,'uni',g);
+  txt(x,y-1,p[0],'tg',g); txt(x,y+9,p[1]||'','tg',g);
+  g.dataset.uni=unidad||''; g.dataset.cx=x;
   return g;
+}
+/* Escribe el valor y estira la cápsula a lo que mida el texto. */
+function ponValor(g,num){
+  const t=g.querySelector('.val');
+  while(t.firstChild) t.removeChild(t.firstChild);
+  t.appendChild(document.createTextNode(num));
+  if(g.dataset.uni){
+    const s=document.createElementNS(NS,'tspan');
+    s.setAttribute('class','uni'); s.textContent=' '+g.dataset.uni;
+    t.appendChild(s);
+  }
+  g.classList.add('vivo');
+  const r=g.querySelector('.capbg'), cx=+g.dataset.cx;
+  let w=52; try{ w=Math.max(46,Math.ceil(t.getBBox().width)+13); }catch(e){}
+  r.setAttribute('width',w); r.setAttribute('x',cx-w/2);
 }
 function valve(id,x,y,tag,vert){
   const g=el('g',{class:'valve',id:'vl_'+id},layers.valves);
@@ -438,30 +464,30 @@ tank('taq404',940,692,90,110,'TAQ-4.04','Agua de regeneración',0.45,'var(--cfee
 pump('bce404',1095,745,'BCE-4.04 A/B','Transferencia 200 L/h');
 
 /* ---------------- INSTRUMENTOS ---------------- */
-instr('ORP-4.01',282,105,282,150,'mV');
-instr('LT-4.01',95,58,95,88,'m');
-instr('FT-5.01',580,105,580,150,'m³/h');
-instr('PH-5.01',678,195,678,150,'pH');
-instr('PSL-5.01',745,195,745,150);
-instr('PT-5.01',832,95,832,150,'bar');
-instr('PT-5.02',1099,95,1099,150,'bar');
-instr('CT-5.02',1290,35,1290,62,'µS/cm');
-instr('FT-5.04',1345,35,1345,62,'m³/h');
-instr('FI-5.05',1240,292,1240,250,'m³/h');
-instr('LT-5.07',40,345,62,380,'m');
-instr('PH-5.06',150,345,140,372,'pH');
-instr('TT-5.07',540,398,540,450,'°C');
-instr('PSL-5.08',592,505,592,450);
-instr('PT-5.09',700,398,722,429,'bar');
-instr('TT-5.09',960,530,920,530,'°C');
-instr('FT-5.12',1230,315,1230,345,'m³/h');
-instr('CT-5.11',1290,315,1290,345,'µS/cm');
-instr('FI-5.13',975,398,975,450,'m³/h');
-instr('LT-5.13',1059,362,1059,388,'m');
-instr('PH-4.06',400,782,400,838,'pH');
-instr('FI-4.05',895,700,850,720,'L/h');
-instr('LT-4.04',920,660,955,692,'m');
-instr('FI-4.04',1250,712,1250,745,'L/h');
+instr('ORP-4.01',270,100,282,150,'mV');
+instr('LT-4.01',95,48,95,88,'m');
+instr('FT-5.01',562,100,580,150,'m³/h');
+instr('PH-5.01',672,198,678,150,'pH');
+instr('PSL-5.01',748,198,745,150);
+instr('PT-5.01',832,88,832,150,'bar');
+instr('PT-5.02',1099,88,1099,150,'bar');
+instr('CT-5.02',1248,30,1290,62,'µS/cm');
+instr('FT-5.04',1330,30,1345,62,'m³/h');
+instr('FI-5.05',1150,272,1240,250,'m³/h');
+instr('LT-5.07',40,332,62,380,'m');
+instr('PH-5.06',182,336,162,372,'pH');
+instr('TT-5.07',540,392,540,450,'°C');
+instr('PSL-5.08',592,508,592,450);
+instr('PT-5.09',700,392,722,429,'bar');
+instr('TT-5.09',968,524,920,540,'°C');
+instr('FT-5.12',1212,318,1230,345,'m³/h');
+instr('CT-5.11',1300,318,1290,345,'µS/cm');
+instr('FI-5.13',960,392,975,450,'m³/h');
+instr('LT-5.13',1059,348,1059,388,'m');
+instr('PH-4.06',400,778,400,838,'pH');
+instr('FI-4.05',872,716,850,730,'L/h');
+instr('LT-4.04',900,652,940,700,'m');
+instr('FI-4.04',1250,698,1250,745,'L/h');
 
 /* ---------------- VÁLVULAS ---------------- */
 valve('FCV501',1240,190,'FCV-5.01',true);
@@ -530,7 +556,7 @@ function pinta(bruto){
     if(k==='ts') continue;
     valores[k]=obj[k];
     const g=document.getElementById('in_'+k);
-    if(g){ g.querySelector('.val').textContent=fmt(obj[k]); g.classList.add('vivo'); }
+    if(g) ponValor(g,fmt(obj[k]));
     const hz=HZ[k] && document.getElementById(HZ[k]);
     if(hz) hz.textContent=fmt(obj[k])+' Hz';
     const kp=document.getElementById('kpi_'+k);
