@@ -47,8 +47,24 @@
   .dot.on{background:#4ADE80; box-shadow:0 0 7px rgba(74,222,128,.8);}
   .dot.off{background:#E8736C;}
 
-  .conexion{background:var(--panel2); border-bottom:1px solid var(--border); padding:10px 20px;
-            display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
+  /* Paneles plegables: el diagrama es lo que importa, lo demás se quita de en medio */
+  .plegable > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:9px;
+      font-size:12px; color:var(--dim); user-select:none; text-transform:uppercase;
+      letter-spacing:.6px; font-weight:600;}
+  .plegable > summary::-webkit-details-marker{display:none;}
+  .plegable > summary::before{content:'\25B8'; font-size:11px; letter-spacing:0;
+      transition:transform .15s; display:inline-block;}
+  .plegable[open] > summary::before{transform:rotate(90deg);}
+  .plegable > summary .res{margin-left:auto; font-family:Consolas,monospace; font-size:11.5px;
+      text-transform:none; letter-spacing:0; font-weight:400; color:var(--txt); opacity:.9;
+      text-align:right;}
+  .plegable.barra{background:var(--panel2); border-bottom:1px solid var(--border);}
+  .plegable.barra > summary{padding:9px 20px;}
+  .plegable.caja[open] > summary{margin-bottom:10px;}
+  .plegable .datos{display:flex; flex-wrap:wrap; gap:7px 28px;}
+  .plegable .dato{border-bottom:none; padding:0; gap:9px;}
+
+  .conexion{padding:4px 20px 12px; display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;}
   .campo{display:flex; flex-direction:column; gap:3px;}
   .campo label{font-size:10.5px; color:var(--dim); text-transform:uppercase; letter-spacing:.4px;}
   .campo input{background:var(--panel); border:1px solid var(--line); color:var(--txt);
@@ -73,18 +89,21 @@
   .kpi .u{font-size:11px; color:var(--dim); font-weight:400; margin-left:2px;}
   .kpi.viejo .v{color:var(--dim); opacity:.5;}
 
-  .fila{display:grid; grid-template-columns:1fr 280px; gap:14px; align-items:start;}
-  @media (max-width:1100px){ .fila{grid-template-columns:1fr;} }
+  main > *{margin-bottom:12px;}
+  main > *:last-child{margin-bottom:0;}
 
-  .caja{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px; min-width:0;}
-  .caja h2{font-size:12.5px; text-transform:uppercase; letter-spacing:.6px; color:var(--dim);
-           margin-bottom:10px; font-weight:600;}
+  .caja{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:11px 14px; min-width:0;}
+  .caja h2{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--dim);
+           margin-bottom:9px; font-weight:600;}
 
-  .pasos{display:flex; flex-direction:column; gap:4px;}
-  .paso{display:flex; align-items:center; gap:9px; padding:4px 8px; border-radius:5px; font-size:12.5px;}
-  .paso .n{font-family:Consolas,monospace; color:var(--dim); font-size:11px; min-width:20px;}
-  .paso.act{background:rgba(15,110,86,.11); color:var(--accent); font-weight:600;}
-  :root[data-theme="dark"] .paso.act, :root:not([data-theme="light"]) .paso.act{background:rgba(79,195,161,.14);}
+  /* La secuencia va en una sola franja horizontal, no en una columna alta */
+  .pasos{display:flex; flex-wrap:wrap; gap:6px;}
+  .paso{display:flex; align-items:center; gap:6px; padding:4px 11px; border-radius:20px;
+        font-size:12px; white-space:nowrap; color:var(--dim);
+        border:1px solid var(--border); background:var(--panel2);}
+  .paso .n{font-family:Consolas,monospace; font-size:10.5px; opacity:.7;}
+  .paso.act{background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600;}
+  .paso.act .n{opacity:.85;}
 
   .datos{display:flex; flex-direction:column; gap:7px;}
   .dato{display:flex; justify-content:space-between; gap:10px; font-size:13px; padding-bottom:5px; border-bottom:1px solid var(--border);}
@@ -129,8 +148,8 @@
   .instr.vivo{opacity:1;}
   .instr circle{fill:var(--panel); stroke:var(--trazo); stroke-width:1.4;}
   .instr text{fill:var(--txt); font-size:9px; font-weight:700; text-anchor:middle; font-family:Consolas,monospace;}
-  .instr .val{fill:var(--accent); font-size:10px;}
-  .instr .uni{fill:var(--dim); font-size:8.5px; font-weight:400;}
+  .instr .val{fill:var(--accent); font-size:12px;}
+  .instr .uni{fill:var(--dim); font-size:9px; font-weight:400;}
   .instr.alerta circle{stroke:var(--bad); stroke-width:2.4;}
   .instr.alerta .val{fill:var(--bad);}
   .leader{stroke:var(--dim); stroke-width:1; stroke-dasharray:2 3; fill:none; opacity:.7;}
@@ -153,6 +172,8 @@
   </div>
 </header>
 
+<details class="plegable barra" id="boxConn" open>
+<summary><span>Conexión al servidor</span><span class="res" id="resConn">sin conectar</span></summary>
 <div class="conexion">
   <div class="campo" style="flex:1 1 280px">
     <label>Servidor</label><input id="host" value="r66a66bd.ala.us-east-1.emqxsl.com">
@@ -164,18 +185,21 @@
   <button class="sec" id="btnTema">Tema</button>
   <div class="aviso" id="aviso">La contraseña se queda en este navegador y no se envía a ningún sitio salvo al broker.</div>
 </div>
+</details>
 
 <div class="alarma" id="alarma"></div>
 
 <main>
   <div class="tira" id="tira"></div>
-  <div class="fila">
-    <div class="svgbox"><svg id="pid" viewBox="0 0 1560 900" xmlns="http://www.w3.org/2000/svg"></svg></div>
-    <div style="display:flex; flex-direction:column; gap:14px;">
-      <div class="caja"><h2>Secuencia RO1</h2><div class="pasos" id="pasos"></div></div>
-      <div class="caja"><h2>Estado</h2><div class="datos" id="estadoLista"></div></div>
-    </div>
-  </div>
+
+  <div class="caja"><h2>Secuencia RO1</h2><div class="pasos" id="pasos"></div></div>
+
+  <details class="plegable caja" id="boxEstado">
+    <summary><span>Estado</span><span class="res" id="resEstado">sin datos</span></summary>
+    <div class="datos" id="estadoLista"></div>
+  </details>
+
+  <div class="svgbox"><svg id="pid" viewBox="0 0 1560 900" xmlns="http://www.w3.org/2000/svg"></svg></div>
 </main>
 
 <footer>Los datos llegan por MQTT desde el CBOX. Esta página solo lee: no puede mandar órdenes a la planta.</footer>
@@ -551,6 +575,11 @@ function pintaEstado(e){
     filas.push(['Último paro', CAUSAS[Number(e.codigo)] || ('código '+e.codigo)]);
   document.getElementById('estadoLista').innerHTML =
     filas.map(([k,v])=>`<div class="dato"><span class="e">${k}</span><span class="v">${v}</span></div>`).join('');
+
+  /* Lo esencial va en el título, para poder dejar la tarjeta cerrada. */
+  let res = paso + (nombre? ' · '+nombre : '');
+  if(e.run_min!==undefined) res += '  ·  '+Math.floor(e.run_min/60)+' h '+(e.run_min%60)+' min';
+  document.getElementById('resEstado').textContent = res;
 }
 
 function pintaAlarma(a){
@@ -577,7 +606,11 @@ setInterval(()=>{
 let cliente=null;
 const dot=document.getElementById('dot'), estadoTxt=document.getElementById('estadoTxt');
 const btn=document.getElementById('btn');
-function estado(c,t){ dot.className='dot '+c; estadoTxt.textContent=t; }
+function estado(c,t){
+  dot.className='dot '+c; estadoTxt.textContent=t;
+  document.getElementById('resConn').textContent =
+    (c==='on' ? document.getElementById('usuario').value+'@'+document.getElementById('host').value : t);
+}
 
 btn.onclick=()=>{
   if(cliente){ cliente.end(true); cliente=null; btn.textContent='Conectar'; estado('','desconectado'); return; }
@@ -597,11 +630,14 @@ btn.onclick=()=>{
     estado('on','conectado'); btn.textContent='Desconectar';
     document.getElementById('aviso').textContent='Conectado. Esperando datos de la planta…';
     cliente.subscribe('permoda/#',{qos:1});
+    /* Ya conectado, el panel no hace falta: se pliega y le deja el sitio al diagrama. */
+    document.getElementById('boxConn').open=false;
   });
   cliente.on('reconnect',()=>estado('','reconectando…'));
   cliente.on('error',e=>{
     estado('off','error: '+(e&&e.message?e.message:'sin detalle'));
     document.getElementById('aviso').textContent='Si dice "Not authorized", revisa usuario y contraseña.';
+    document.getElementById('boxConn').open=true;   /* para poder corregirlo */
   });
   cliente.on('close',()=>{ if(cliente) estado('off','desconectado'); });
   cliente.on('message',(t,p)=>{
