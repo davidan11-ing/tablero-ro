@@ -156,6 +156,16 @@
   .eq.run .glow{filter:drop-shadow(0 0 6px rgba(79,195,161,.5));}
   .eq.run .imp{animation:spin 1.1s linear infinite; transform-box:fill-box; transform-origin:center;}
   @keyframes spin{to{transform:rotate(360deg);}}
+  /* Suavizador regenerando: no está dando agua, está lavándose. */
+  .eq.regen{opacity:1;}
+  .eq.regen .body{stroke:var(--crech);}
+  .eq.regen .lecho{animation:latido 1.8s ease-in-out infinite;}
+  @keyframes latido{0%,100%{opacity:1} 50%{opacity:.35}}
+  @media (prefers-reduced-motion: reduce){ .eq.regen .lecho{animation:none;} }
+  .svlbl{fill:var(--dim); font-size:8px; text-anchor:middle; paint-order:stroke;
+         stroke:var(--panel2); stroke-width:3px; stroke-linejoin:round;}
+  .eq.run .svlbl{fill:var(--accent); font-weight:700;}
+  .eq.regen .svlbl{fill:var(--crech); font-weight:700;}
   /* Halo del color del fondo: los rótulos siguen legibles aunque les pase
      una tubería por detrás, sin tener que esquivarlas todas a mano. */
   .eqlbl,.eqsub,.zonelbl,.arrowlbl{paint-order:stroke; stroke:var(--panel);
@@ -291,16 +301,22 @@ function dospump(id,cx,cy,label){
   txt(cx,cy-15,label,'eqsub',g);
   return g;
 }
-function softener(id,cx,ytop,label){
-  const w=42,h=100,x=cx-w/2;
+/* Suavizador: recipiente, lámina de agua, lecho de resina y, dentro, el
+   número y el estado que manda MV.FilterN.step. */
+function softener(id,cx,ytop,w,h,num){
+  const x=cx-w/2, r=Math.min(18,w/2.4);
   const g=el('g',{class:'eq',id:'eq_'+id},layers.equip);
-  el('path',{d:`M${x},${ytop+16} Q${x},${ytop} ${cx},${ytop} Q${x+w},${ytop} ${x+w},${ytop+16} V${ytop+h-16} Q${x+w},${ytop+h} ${cx},${ytop+h} Q${x},${ytop+h} ${x},${ytop+h-16} Z`,
+  el('path',{d:`M${x},${ytop+r} Q${x},${ytop} ${cx},${ytop} Q${x+w},${ytop} ${x+w},${ytop+r} V${ytop+h-r} Q${x+w},${ytop+h} ${cx},${ytop+h} Q${x},${ytop+h} ${x},${ytop+h-r} Z`,
     fill:'var(--panel2)',stroke:'var(--accent)','stroke-width':1.7,class:'body glow'},g);
-  el('rect',{x:x+4,y:ytop+42,width:w-8,height:h-58,rx:5,fill:'var(--resina)'},g);
-  for(let i=0;i<14;i++)
-    el('circle',{cx:x+8+((i*7)%(w-14)),cy:ytop+50+Math.floor(i/5)*13+(i%3)*4,r:2,fill:'var(--resinapt)',opacity:.8},g);
-  el('rect',{x:x+4,y:ytop+14,width:w-8,height:22,rx:5,fill:'var(--line)',opacity:.65,class:'liquid'},g);
-  if(label) txt(cx,ytop+h+16,label,'eqlbl',g);
+  el('rect',{x:x+5,y:ytop+24,width:w-10,height:22,rx:6,fill:'var(--line)',opacity:.5,class:'liquid'},g);
+  const by=ytop+50, bh=h-70;
+  el('rect',{x:x+5,y:by,width:w-10,height:bh,rx:6,fill:'var(--resina)',class:'lecho'},g);
+  const cols=Math.max(3,Math.floor((w-14)/10)), filas=Math.max(3,Math.floor((bh-6)/12));
+  for(let i=0;i<cols*filas;i++)
+    el('circle',{cx:x+9+(i%cols)*10+((Math.floor(i/cols)%2)?3:0),
+                 cy:by+9+Math.floor(i/cols)*12, r:2.1, fill:'var(--resinapt)', opacity:.75},g);
+  txt(cx,ytop+17,num,'eqsub',g);
+  txt(cx,ytop+h-9,'','svlbl',g).setAttribute('id','sv_'+id);
   return g;
 }
 function membrane(id,x,y,w,label,sub){
@@ -392,10 +408,10 @@ txt(918,302,'REGENERACIÓN DE RESINA','zonelbl',layers.pipes);
 pipe('p1',[[130,150],[186,150]],'feed');
 pipe('p2',[[222,150],[302,150]],'feed');
 pipe('dqn',[[245,62],[245,150]],'dos',1);
-pipe('sin1',[[302,150],[302,78],[535,78]],'feed');
-pipe('sd1',[[330,78],[330,97]],'feed'); pipe('sd2',[[380,78],[380,97]],'feed'); pipe('sd3',[[430,78],[430,97]],'feed');
-pipe('sb1',[[330,197],[330,218]],'feed'); pipe('sb2',[[380,197],[380,218]],'feed'); pipe('sb3',[[430,197],[430,218]],'feed');
-pipe('sout',[[330,218],[535,218]],'feed');
+pipe('sin1',[[302,150],[302,72],[535,72]],'feed');
+pipe('sd1',[[334,72],[334,88]],'feed'); pipe('sd2',[[410,72],[410,88]],'feed'); pipe('sd3',[[486,72],[486,88]],'feed');
+pipe('sb1',[[334,206],[334,218]],'feed'); pipe('sb2',[[410,206],[410,218]],'feed'); pipe('sb3',[[486,206],[486,218]],'feed');
+pipe('sout',[[334,218],[535,218]],'feed');
 pipe('pout',[[535,218],[558,218],[558,150],[600,150]],'feed');
 pipe('p34',[[600,150],[772,150]],'feed');
 pipe('dq1',[[720,62],[720,150]],'dos',1);
@@ -433,9 +449,10 @@ pipe('r2',[[1412,415],[1455,415]],'rech');
 tank('taq401',30,88,100,112,'TAQ-4.01','Permeado MBR',0.68);
 pump('bce401',202,150,'BCE-4.01 A/B','Alimentación');
 dospump('dpNah',245,45,'BDO-4.02 NaHSO₃');
-const g1=softener('s1',330,97,''), g2=softener('s2',380,97,''), g3=softener('s3',430,97,'');
-txt(330,131,'01','eqsub',g1); txt(380,131,'02','eqsub',g2); txt(430,131,'03','eqsub',g3);
-txt(380,58,'SVZ-4.01 / 4.02 / 4.03 — SUAVIZADORES (2+1)','eqlbl',g2);
+softener('s1',334,88,58,118,'01'); const g2=softener('s2',410,88,58,118,'02'); softener('s3',486,88,58,118,'03');
+txt(410,52,'SVZ-4.01 / 4.02 / 4.03 — SUAVIZADORES (2+1)','eqlbl',g2);
+txt(300,240,'','arrowlbl',layers.equip).setAttribute('id','sfResumen');
+document.getElementById('sfResumen').setAttribute('text-anchor','start');
 filterC('ftp501a',616,150,''); filterC('ftp501b',650,150,'FTP-5.01 A/B');
 dospump('dp1a',690,45,'HCl'); dospump('dp1b',720,28,'Antiincr.'); dospump('dp1c',750,45,'Biocida');
 pump('bce504',790,150,'BCE-5.04 · VFD','Alta presión RO1');
@@ -494,9 +511,36 @@ valve('FCV425',536,490,'FCV-4.25',true,22);
    DATOS EN VIVO
    ============================================================ */
 /* Tuberías y equipos que se animan cuando RO1 está produciendo */
-const RUTA_RO1 = ['p1','p2','sin1','sd1','sd2','sd3','sb1','sb2','sb3','sout','pout',
-                  'p34','p5','p6','p7','perm1','perm2','rej1'];
-const EQ_RO1   = ['taq401','bce401','s1','s2','ftp501a','ftp501b','bce504','ro1e1','bce505','ro1e2','reuso'];
+const RUTA_RO1 = ['p1','p2','sin1','sout','pout','p34','p5','p6','p7','perm1','perm2','rej1'];
+const EQ_RO1   = ['taq401','bce401','ftp501a','ftp501b','bce504','ro1e1','bce505','ro1e2','reuso'];
+
+/* Pasos de FC57 "Filter": 11-12 servicio, 20-27 regeneración, 0 reposo.
+   Vienen en F1/F2/F3, que son MV.Filter1/2/3.step (DB1.190/200/210). */
+const PASOS_SF={0:['parado','en reposo'], 11:['entrando','entrando a servicio'], 12:['servicio','en servicio'],
+  20:['regenera','regenerando · drenado'],     21:['regenera','regenerando · salmuera NaCl'],
+  22:['regenera','regenerando · lavado lento'],23:['regenera','regenerando · contralavado'],
+  24:['regenera','regenerando · purga'],       25:['regenera','regenerando · enjuague'],
+  26:['regenera','regenerando · enjuague final'], 27:['regenera','regeneración terminada']};
+
+function pintaFiltros(e){
+  const resumen=[];
+  [['F1','s1','sd1','sb1','01'],['F2','s2','sd2','sb2','02'],['F3','s3','sd3','sb3','03']]
+  .forEach(([k,sid,ent,sal,n])=>{
+    if(e[k]===undefined) return;
+    const p=Number(e[k]);
+    const serv = p>=11 && p<=12, regen = p>=20 && p<=27;
+    const g=document.getElementById('eq_'+sid);
+    if(g){ g.classList.toggle('run',serv); g.classList.toggle('regen',regen); }
+    /* La entrada y la salida solo corren si el suavizador está dando agua. */
+    [ent,sal].forEach(id=>{const t=document.getElementById('pp_'+id); if(t) t.classList.toggle('on',p===12);});
+    const txt2=PASOS_SF[p] || ['paso '+p,'paso '+p];
+    const et=document.getElementById('sv_'+sid);
+    if(et) et.textContent=txt2[0];
+    resumen.push('SVZ-4.'+n+' '+txt2[1]);
+  });
+  const r=document.getElementById('sfResumen');
+  if(r) r.textContent=resumen.join('   ·   ');
+}
 
 const KPIS=[
   ['FT501','Caudal RO1','m³/h'], ['PT501','Presión E1','bar'], ['PT502','Presión E2','bar'],
@@ -576,6 +620,8 @@ function pintaEstado(e){
   const enMarcha = paso>=12 && paso<=15;
   RUTA_RO1.forEach(id=>{const p=document.getElementById('pp_'+id); if(p) p.classList.toggle('on',enMarcha);});
   EQ_RO1.forEach(id=>{const g=document.getElementById('eq_'+id); if(g) g.classList.toggle('run',enMarcha);});
+
+  pintaFiltros(e);
 
   const nombre=e.step_txt || (PASOS.find(p=>p[0]===paso)||[,''])[1] || '';
   const filas=[['Paso', paso + (nombre? ' · '+nombre : '')]];
