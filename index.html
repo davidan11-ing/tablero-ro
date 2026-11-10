@@ -630,9 +630,16 @@ PASOS.forEach(([n,t])=>{
   cPasos.appendChild(d);
 });
 
-const CAUSAS={1:'Nivel bajo LT401',2:'Nivel alto LT507',3:'Equipos no listos',4:'Timeout de acción',
-  5:'Caudal bajo FT501',6:'Presión alta PT501',7:'Presión alta PT502',8:'pH',9:'ORP',
-  10:'PSL501',11:'Parada de emergencia',12:'Timeout de filtro',13:'Parada manual'};
+/* Códigos de CP_Code (DB6.DBW0), tal como los define la receta del PLC. */
+const CAUSAS={
+  1:'Nivel bajo LT401',            2:'Nivel alto LT507 (destino lleno)',
+  3:'Equipos no listos',           4:'Timeout de acción (válvula o bomba)',
+  5:'Caudal bajo FT501',           6:'Presión alta PT501',
+  7:'Presión alta PT502',          8:'pH fuera de rango',
+  9:'ORP alto',                    10:'Presión baja de succión (PSL501)',
+  11:'Paro de emergencia',         12:'Timeout de filtro',
+  13:'Parada manual del operador', 14:'Condición de dosificación',
+  15:'Otra causa / no identificada'};
 
 /* Los Hz no son instrumentos: van encima de su bomba */
 const HZ={Hz504:'hz_bce504', Hz505:'hz_bce505'};
