@@ -1235,6 +1235,12 @@ const COND = [['Process request',8,'p'],['Dosing level',9,'p'],['Motors & valves
               ['PSL.5.01',11,'t'],['E-STOP',15,'t'],['Filter timeout',0,'t'],
               ['pH.5.01',1,'t'],['ORP.4.01',2,'t'],['Action timeout',3,'t']];
 
+/* Crea un elemento SVG en el padre que se le diga. Vivia en el bloque de
+   RF1 y al reescribirlo se perdio: montaCTR() la usa y dejaba la pantalla
+   CTR14 en blanco sin avisar. */
+function elS(t,a,p){const e=document.createElementNS(NS,t);
+  for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;}
+
 function montaCTR(){
   const ov=document.getElementById('ovCTR'); if(!ov) return;
   while(ov.firstChild) ov.removeChild(ov.firstChild);
