@@ -1264,28 +1264,39 @@ function montaCTR(){
                   opacity:.45},ov);
     T(x,y+32,et,{'text-anchor':'middle','font-size':10,fill:'#7A889E'});
   };
-  const marco=(x,y,w,h,tit)=>{
+  const marco=(x,y,w,h,tit,izq)=>{
     elS('rect',{x:x,y:y,width:w,height:h,rx:6,fill:'#E6E9ED',
                 stroke:'#A6ADB8','stroke-width':1},ov);
-    T(x+w/2,y+18,tit,{'text-anchor':'middle','font-size':14,'font-weight':'bold',
-                      fill:'#2C3442'});
+    T(izq?x+15:x+w/2, y+19, tit,
+      {'text-anchor':izq?'start':'middle','font-size':14,'font-weight':'bold',
+       fill:'#2C3442'});
+  };
+  /* Distintivo de estado del suavizador: pastilla con punto, para que se
+     lea de un vistazo y no compita con el titulo. */
+  const distintivo=(x,y,k)=>{
+    elS('rect',{x:x,y:y,width:112,height:22,rx:11,fill:'#969CA6',
+                id:'chip_'+k},ov);
+    elS('circle',{cx:x+14,cy:y+11,r:4.5,fill:'#FFFFFF','fill-opacity':.9,
+                  id:'chipD_'+k},ov);
+    T(x+26,y+15,'--',{'font-size':11,'font-weight':'bold',fill:'#FFFFFF',
+                      id:'chipT_'+k});
   };
 
   /* ---- los tres suavizadores ---- */
   [['F1',24],['F2',336],['F3',648]].forEach(([k,x])=>{
-    marco(x,84,296,300,'Softening filter '+k[1]);
-    elS('rect',{x:x+208,y:90,width:82,height:19,rx:3,fill:'#969CA6',id:'chip_'+k},ov);
-    T(x+249,104,'--',{'text-anchor':'middle','font-size':11,fill:'#202630',id:'chipT_'+k});
-    T(x+76,40+76,'Run status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
-    T(x+218,40+76,'Backwash status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
-    SF_RUN.forEach(([p,s],i)=>lampara(x+14,124+i*24,124,s,k+'r'+p));
-    valor(x+14,124+3*24,124,'v_'+k+'min','Min');
-    SF_WASH.forEach(([p,s],i)=>lampara(x+152,124+i*24,130,s,k+'w'+p));
-    valor(x+152,124+7*24,130,'v_'+k+'sec','Seg');
+    marco(x,84,296,300,'Suavizador '+k[1],true);
+    distintivo(x+170,86,k);
+    /* las columnas bajan a 122: a 116 el rotulo rozaba la pastilla */
+    T(x+76,122,'Run status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    T(x+218,122,'Backwash status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    SF_RUN.forEach(([p,s],i)=>lampara(x+14,130+i*24,124,s,k+'r'+p));
+    valor(x+14,130+3*24,124,'v_'+k+'min','Min');
+    SF_WASH.forEach(([p,s],i)=>lampara(x+152,130+i*24,130,s,k+'w'+p));
+    valor(x+152,130+7*24,130,'v_'+k+'sec','Seg');
     /* "Backwash cmd" del HMI. Aqui NO son botones: el tablero solo lee, asi
        que van apagados y con el contorno de su color, no rellenos. */
-    T(x+76,250,'Backwash cmd',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
-    boton(x+46,278,'Start','#1A8066'); boton(x+106,278,'Stop','#C42626');
+    T(x+76,256,'Backwash cmd',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    boton(x+46,284,'Start','#1A8066'); boton(x+106,284,'Stop','#C42626');
   });
 
   /* ---- RO1 ---- */
@@ -1345,12 +1356,13 @@ function pintaCTR(o){
     const p=Number(o[k]);
     SF_RUN.forEach(([s])=>enciende(k+'r'+s, p===s || (s===12&&p===12)));
     SF_WASH.forEach(([s])=>enciende(k+'w'+s, p===s));
-    const ch=document.getElementById('chip_'+k), ct=document.getElementById('chipT_'+k);
+    const ch=document.getElementById('chip_'+k), ct=document.getElementById('chipT_'+k),
+          cd=document.getElementById('chipD_'+k);
     if(ch&&ct){
       const serv=p>=11&&p<=12, reg=p>=20&&p<=27;
-      ch.setAttribute('fill', serv?COL.marcha:(reg?COL.aviso:COL.parado));
-      ct.setAttribute('fill', serv?'#fff':'#202630');
-      ct.textContent = serv?'En servicio':(reg?'Regenerando':'Standby');
+      ch.setAttribute('fill', serv?'#1A8066':(reg?'#C2703A':'#8A93A1'));
+      ct.textContent = serv?'En servicio':(reg?'Regenerando':'Parado');
+      if(cd) cd.setAttribute('fill-opacity', (serv||reg)?.95:.55);
     }
   });
   [['F1run','v_F1min'],['F2run','v_F2min'],['F3run','v_F3min']].forEach(([k,id])=>{
