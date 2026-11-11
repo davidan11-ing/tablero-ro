@@ -1012,8 +1012,9 @@ function dibujaRF1(){
   /* --- las 23 valvulas, en la posicion exacta que ocupan en el HMI --- */
   RF1.filter(q=>q.k==='v').forEach(q=>{
     const c=CEN(q.t);
-    const vert = !(q.t==='FCV406'||q.t==='FCV413'||q.t==='FCV420');
-    const g=valve('r_'+q.t,c.x,c.y,q.t.replace('FCV4','FCV-4.'),vert,0);
+    /* En el HMI TODAS las valvulas van en corbata horizontal, con el
+       rotulo encima. Dibujarlas verticales cambiaba el icono. */
+    const g=valve('r_'+q.t,c.x,c.y,q.t.replace('FCV4','FCV-4.'),false,0);
     const e=g.querySelector('text');
     if(e){e.setAttribute('x',c.x); e.setAttribute('y',c.y-13);
           e.setAttribute('text-anchor','middle');}
