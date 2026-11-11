@@ -1317,9 +1317,30 @@ function montaCTR(){
 
   /* ---- RO2: existe en la pantalla real, pero el tren esta fuera ---- */
   marco(664,400,592,290,'RO2');
-  T(960,545,'fuera de servicio',{'text-anchor':'middle','font-size':15,fill:'#7A889E'});
-  T(960,567,'no se publican sus variables',{'text-anchor':'middle','font-size':12,
-                                            fill:'#969CA6'});
+  /* RO2 se dibuja con el mismo reparto que RO1, en gris: el tren esta
+     fuera y no publicamos ninguna de sus variables, pero dejarlo vacio
+     se leia como un fallo del tablero. */
+  elS('rect',{x:1092,y:404,width:148,height:22,rx:11,fill:'#8A93A1',
+              opacity:.75},ov);
+  T(1166,419,'Fuera de servicio',{'text-anchor':'middle','font-size':11,
+                                  'font-weight':'bold',fill:'#FFFFFF'});
+  const gris=(x,y,w,t)=>{
+    elS('rect',{x:x,y:y,width:w,height:20,rx:3,fill:'#D7DBE1',
+                stroke:'#C6CBD3','stroke-width':1,opacity:.5},ov);
+    if(t) T(x+w/2,y+14,t,{'text-anchor':'middle','font-size':11,fill:'#969CA6'});
+  };
+  T(755,434,'Step status',{'text-anchor':'middle','font-size':11,fill:'#7A889E'});
+  ['Stoped','Waiting run','Starting','Running','-- Min/Run','Flushing','-- Seg/Step']
+    .forEach((t,i)=>gris(694,444+i*26,122,t));
+  T(1035,434,'Start up conditions',{'text-anchor':'middle','font-size':11,fill:'#7A889E'});
+  ['Process request','Dosing level','Motors & valves',
+   'PSL.5.08','TT.5.07&5.09','E-STOP',
+   'pH.5.06','Action timeout'].forEach((t,i)=>
+    gris(830+(i%3)*140,444+Math.floor(i/3)*26,130,t));
+  boton(900,618,'Start','#8A93A1'); boton(1010,618,'Reset','#8A93A1');
+  boton(1120,618,'Stop','#8A93A1');
+  T(1035,560,'no se publican sus variables',{'text-anchor':'middle','font-size':11,
+                                             fill:'#A8AEB8'});
   /* ---- ablandamiento quimico: area 600, no es nuestra ----
      Va a la DERECHA del suavizador 3, que acaba en x=944. El marco
      empezaba en 664 y se comia esa columna entera. */
