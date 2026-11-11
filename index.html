@@ -942,7 +942,10 @@ function dibujaRF1(){
   const S=(id,pts,fl,thin)=>{L.pipes=gS; const r=pipe('r_'+id,pts,fl,thin);
                              L.pipes=gP; return r;};
   const GEO={};
-  const HFEED=72, HDREN=442, HCOL=474, HREG=506;
+  /* HREG va justo debajo de los vasos: es la linea que une las valvulas
+     de fondo FCV-4.06 / 4.13 / 4.20, por donde entran salmuera y agua
+     de regeneracion. Antes colgaba a y=506 sin tocarlas. */
+  const HFEED=72, HDREN=442, HCOL=474, HREG=398;
 
   /* terminador: punta y rotulo. Una linea o conecta, o acaba asi. */
   const fin=(x,y,dir,label)=>{
@@ -967,7 +970,7 @@ function dibujaRF1(){
   /* --- colectores, recortados a lo que de verdad reciben --- */
   P('drenh',[[453,HDREN],[1161,HDREN]],'drain');
   P('colh',[[435,HCOL],[1161,HCOL]],'perm');
-  P('regh',[[255,HREG],[1000,HREG]],'cip');
+  P('regh',[[255,HREG],[1010,HREG]],'cip');
   P('dren',[[1161,HDREN],[1226,HDREN]],'drain');
   P('ro1',[[1161,HCOL],[1226,HCOL]],'perm');
   fin(1232,HDREN,'left','a drenaje');
@@ -991,8 +994,7 @@ function dibujaRF1(){
     P('sal'+s.n+'b',[[de-18,c(s.sal).y],[de-18,HCOL]],'perm');
     S('esu'+s.n,[[c(s.esup).x,c(s.esup).y],[iz,c(s.esup).y]],'cip',true);
     P('esu'+s.n+'b',[[iz,c(s.esup).y],[iz,HREG]],'cip',true);
-    S('ein'+s.n,[[c(s.einf).x,c(s.einf).y],[c(s.einf).x,398],[iz+18,398]],'cip',true);
-    P('ein'+s.n+'b',[[iz+18,398],[iz+18,HREG]],'cip',true);
+    S('ein'+s.n,[[c(s.einf).x,c(s.einf).y],[c(s.einf).x,HREG]],'cip',true);
   });
 
   /* --- dosificacion NaHSO3: TAQ-4.02 -> BDO-4.02A/B -> colector --- */
@@ -1004,14 +1006,14 @@ function dibujaRF1(){
   /* --- salmuera: TAQ-4.03 -> BCE-4.03A/B -> colector de regeneracion --- */
   P('naclA',[[675,509],[617,509]],'brine');
   P('naclB',[[675,574],[617,574]],'brine');
-  P('nacl',[[600,490],[600,470],[540,470],[540,HREG]],'brine');
-  P('naclb',[[600,555],[560,555],[560,470]],'brine');
+  P('nacl',[[600,490],[600,HREG]],'brine');
+  P('naclb',[[600,555],[560,555],[560,HREG]],'brine');
 
   /* --- agua de regeneracion: TAQ-4.04 -> BCE-4.05A/B --- */
   P('reg',[[1106,600],[520,600],[520,609],[479,609]],'cip');
   P('regb',[[520,609],[520,673],[479,673]],'cip');
-  P('regs',[[462,590],[462,560],[404,560],[404,HREG]],'cip');
-  P('regs2',[[462,651],[440,651],[440,560]],'cip');
+  P('regs',[[462,590],[462,HREG]],'cip');
+  P('regs2',[[462,651],[440,651],[440,HREG]],'cip');
 
   /* --- transferencia: TAQ-4.04 -> BCE-4.04A/B --- */
   P('traA',[[1106,609],[1063,609]],'cip',true);
@@ -1095,6 +1097,12 @@ function pintaRF1(o){
                 !(bitDe(Number(o[t]),M.FLT)||bitDe(Number(o[t]),M.Bad));
   const run=t=>o[t]!==undefined && bitDe(Number(o[t]),M.Runing);
   const feed=run('BCE401A')||run('BCE401B');
+  /* Para que una linea corra hace falta destino Y origen. El colector de
+     regeneracion solo lleva agua si empuja alguna de sus bombas. */
+  const nacl=run('BCE403A')||run('BCE403B');
+  const reg=run('BCE405A')||run('BCE405B');
+  const tra=run('BCE404A')||run('BCE404B');
+  const fuenteReg = nacl||reg||tra;
   on('r_feedS',feed); on('r_feedSa',run('BCE401A')); on('r_feedSb',run('BCE401B'));
   on('r_feedDa',run('BCE401A')); on('r_feedDb',run('BCE401B'));
   on('r_feedR',feed); on('r_feedh',feed);
@@ -1105,8 +1113,8 @@ function pintaRF1(o){
     on('r_sal'+s.n,sa); on('r_sal'+s.n+'b',sa);
     on('r_dsu'+s.n,ab(s.dsup)); on('r_dsu'+s.n+'b',ab(s.dsup));
     on('r_din'+s.n,ab(s.dinf)); on('r_din'+s.n+'b',ab(s.dinf));
-    on('r_esu'+s.n,ab(s.esup)); on('r_esu'+s.n+'b',ab(s.esup));
-    on('r_ein'+s.n,ab(s.einf)); on('r_ein'+s.n+'b',ab(s.einf));
+    on('r_esu'+s.n,ab(s.esup)&&fuenteReg); on('r_esu'+s.n+'b',ab(s.esup)&&fuenteReg);
+    on('r_ein'+s.n,ab(s.einf)&&fuenteReg);
     on('r_ven'+s.n,ab(s.vent)); on('r_ven'+s.n+'b',ab(s.vent));
     hayCol = hayCol||sa;
     hayDren = hayDren||ab(s.dsup)||ab(s.dinf);
@@ -1114,14 +1122,11 @@ function pintaRF1(o){
   });
   on('r_colh',hayCol&&ab('FCV422')); on('r_ro1',hayCol&&ab('FCV422'));
   on('r_drenh',hayDren); on('r_dren',hayDren&&ab('FCV423'));
-  const nacl=run('BCE403A')||run('BCE403B');
-  const reg=run('BCE405A')||run('BCE405B');
   on('r_naclA',run('BCE403A')); on('r_naclB',run('BCE403B'));
   on('r_nacl',nacl); on('r_naclb',run('BCE403B'));
   on('r_reg',reg); on('r_regb',run('BCE405B'));
   on('r_regs',reg); on('r_regs2',run('BCE405B'));
-  on('r_regh',hayReg||reg||nacl);
-  const tra=run('BCE404A')||run('BCE404B');
+  on('r_regh',hayReg&&fuenteReg);
   on('r_traA',run('BCE404A')); on('r_traB',run('BCE404B'));
   on('r_tra',tra); on('r_trab',run('BCE404B'));
   on('r_dosA',run('BDO402A')); on('r_dosB',run('BDO402B'));
