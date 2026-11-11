@@ -967,10 +967,11 @@ function dibujaRF1(){
     const d = dir==='up'   ? 'M'+x+','+y+' l-5,9 h10 z'
             : dir==='right'? 'M'+x+','+y+' l-9,-5 v10 z'
             :                'M'+x+','+y+' l9,-5 v10 z';
-    el('path',{d:d,fill:'var(--trazo)',opacity:.55},gP);
-    const t=txt(dir==='up'?x:(dir==='right'?x-5:x+5),
-                dir==='up'?y-7:y-10, label,'arrowlbl',gP);
-    t.setAttribute('text-anchor', dir==='right'?'end':(dir==='up'?'middle':'start'));
+    el('path',{d:d,fill:'var(--trazo)',opacity:.6},gP);
+    /* el rotulo del destino va al otro lado de la punta, no detras */
+    const t=txt(dir==='up'?x:(dir==='right'?x+6:x-6),
+                dir==='up'?y-8:y+4, label,'arrowlbl',gP);
+    t.setAttribute('text-anchor', dir==='right'?'start':(dir==='up'?'middle':'end'));
   };
 
   /* --- alimentacion: TAQ-4.01 -> BCE-4.01A/B -> colector --- */
@@ -986,10 +987,10 @@ function dibujaRF1(){
   P('drenh',[[453,HDREN],[1161,HDREN]],'drain');
   P('colh',[[435,HCOL],[1161,HCOL]],'perm');
   P('regh',[[255,HREG],[1010,HREG]],'cip');
-  P('dren',[[1161,HDREN],[1226,HDREN]],'drain');
-  P('ro1',[[1161,HCOL],[1226,HCOL]],'perm');
-  fin(1232,HDREN,'left','a drenaje');
-  fin(1232,HCOL,'left','a RO1');
+  P('dren',[[1161,HDREN],[1196,HDREN]],'drain');
+  P('ro1',[[1161,HCOL],[1196,HCOL]],'perm');
+  fin(1200,HDREN,'right','a drenaje');
+  fin(1200,HCOL,'right','a RO1');
 
   /* --- por suavizador --- */
   SF.forEach(s=>{
@@ -1024,28 +1025,25 @@ function dibujaRF1(){
   P('nacl',[[600,490],[600,HREG]],'brine');
   P('naclb',[[600,555],[560,555],[560,HREG]],'brine');
 
-  /* BCE-4.05A/B: trazado leido del propio HMI (vertical en x=416 desde la
-     linea de fondo, ramales en y=612 y 676, descarga por x=507 hasta la
-     horizontal de y=577 que va a TAQ-4.03). */
+  /* BCE-4.05A/B: aspiran de la linea de fondo por el colector de x=416 y
+     descargan a "Reuse Water". En el HMI ese texto es el DESTINO de la
+     linea, no una etiqueta suelta: antes lo llevaba a TAQ-4.03. */
   P('regSuc',[[416,HREG],[416,673]],'cip');
-  P('regA',[[416,612],[445,612]],'cip');
+  P('regA',[[416,609],[445,609]],'cip');
   P('regB',[[416,673],[445,673]],'cip');
-  P('regAd',[[479,609],[507,609],[507,577]],'cip');
-  P('regBd',[[479,673],[507,673],[507,609]],'cip');
-  P('regOut',[[507,577],[675,577]],'cip');
-  txt(668,664,'Reuse Water','eqsub',gP);
+  P('regAd',[[479,609],[507,609],[507,673]],'cip');
+  P('regOut',[[479,673],[632,673]],'cip');
+  fin(636,673,'right','Reuse Water');
 
-  /* BCE-4.04A/B: en el HMI forman un colector local entre x=1002 y x=1092
-     junto a TAQ-4.04, sin salir a ningun sitio mas. */
-  P('traSuc',[[1106,612],[1092,612],[1092,673]],'cip',true);
-  P('traA',[[1092,612],[1074,612]],'cip',true);
+  /* BCE-4.04A/B: aspiran de TAQ-4.04 y descargan a "TAQ-5.13". */
+  P('traSuc',[[1106,609],[1092,609],[1092,673]],'cip',true);
+  P('traA',[[1092,609],[1074,609]],'cip',true);
   P('traB',[[1092,673],[1074,673]],'cip',true);
   P('traAd',[[1018,609],[1002,609],[1002,673]],'cip',true);
-  P('traBd',[[1018,673],[1002,673]],'cip',true);
-  txt(931,664,'TAQ-5.13','eqsub',gP);
+  P('traOut',[[1018,673],[968,673]],'cip',true);
+  fin(964,673,'left','TAQ-5.13');
 
-  el('rect',{x:236,y:106,width:800,height:312,class:'zone'},gP);
-  txt(636,100,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',gP);
+  /* sin cinta de zona: el HMI no la trae y su rotulo pisaba los venteos */
 
   const tanque=(id,x,y,w,hh,lab,sub,col)=>{GEO[id]={y:y,h:hh};
     return tank(id,x,y,w,hh,lab,sub,.45,col);};
@@ -1153,10 +1151,10 @@ function pintaRF1(o){
   on('r_dosA',run('BDO402A')); on('r_dosB',run('BDO402B'));
   on('r_dosh',run('BDO402A')); on('r_dosh2',run('BDO402B'));
   on('r_regSuc',reg); on('r_regA',run('BCE405A')); on('r_regB',run('BCE405B'));
-  on('r_regAd',run('BCE405A')); on('r_regBd',run('BCE405B')); on('r_regOut',reg);
+  on('r_regAd',run('BCE405A')); on('r_regOut',reg);
   const tra=run('BCE404A')||run('BCE404B');
   on('r_traSuc',tra); on('r_traA',run('BCE404A')); on('r_traB',run('BCE404B'));
-  on('r_traAd',run('BCE404A')); on('r_traBd',run('BCE404B'));
+  on('r_traAd',run('BCE404A')); on('r_traOut',tra);
 }
 function on(id,v){const p=document.getElementById('pp_'+id); if(p) p.classList.toggle('on',!!v);}
 function nivel(id,v,max){
