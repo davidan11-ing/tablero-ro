@@ -207,6 +207,42 @@
   .valve text{fill:var(--dim); font-size:8.5px; font-family:Consolas,monospace; text-anchor:middle;}
 
   footer{padding:14px 20px; color:var(--dim); font-size:11.5px; text-align:center;}
+
+  /* ---- vistas del HMI de planta ---- */
+  .tabs{display:flex; gap:6px; margin-bottom:13px; flex-wrap:wrap;}
+  .tabs button{background:var(--panel); color:var(--dim); border:1px solid var(--border);
+               font-weight:500; padding:6px 14px;}
+  .tabs button.act{background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600;}
+  .vista[hidden]{display:none;}
+  .hmibox{background:#C2C7CF; border:1px solid var(--border); border-radius:10px;
+          padding:8px; overflow-x:auto;}
+  .hmibox svg{display:block; width:100%; height:auto; min-width:760px;}
+  .nota{font-size:11.5px; color:var(--dim); margin:7px 2px 0;}
+  .hs{cursor:pointer;}
+  .hs:hover rect.caz{stroke-width:3;}
+
+  .modal{position:fixed; inset:0; background:rgba(12,16,22,.55); z-index:60;
+         display:flex; align-items:center; justify-content:center; padding:16px;}
+  .modal[hidden]{display:none;}
+  .mv{width:330px; max-width:100%; background:#E6E9ED; border:1px solid #A6ADB8;
+      border-radius:9px; overflow:hidden; color:#202630;
+      font-family:Tahoma,Verdana,sans-serif; box-shadow:0 18px 50px rgba(0,0,0,.4);}
+  .mv h3{margin:0; padding:11px 14px; background:#7A889E; color:#F5F6F8;
+         font-size:16px; display:flex; justify-content:space-between; align-items:center;}
+  .mv h3 b{font-weight:700; letter-spacing:.3px;}
+  .mv h3 span{cursor:pointer; background:#2C3442; color:#ECEEF2; border-radius:4px;
+              width:26px; height:26px; display:grid; place-items:center; font-size:15px;}
+  .mv .chips{display:grid; grid-template-columns:repeat(4,1fr); gap:5px; padding:11px;}
+  .mv .chip{background:#969CA6; color:#202630; text-align:center; padding:6px 2px;
+            font-size:11.5px; border-radius:4px; opacity:.45;}
+  .mv .chip.on{opacity:1; background:#008200; color:#fff;}
+  .mv .chip.mal{opacity:1; background:#FF0000; color:#fff;}
+  .mv .chip.man{opacity:1; background:#8E4296; color:#fff;}
+  .mv .filas{padding:0 11px 12px;}
+  .mv .f{display:flex; justify-content:space-between; font-size:12.5px;
+         padding:5px 0; border-top:1px solid #C6CBD3;}
+  .mv .f b{font-family:Consolas,monospace;}
+  .mv .pie{padding:9px 13px; background:#D7DBE1; font-size:11px; color:#626A78;}
 </style>
 </head>
 <body>
@@ -252,8 +288,253 @@
     </details>
   </div>
 
+
+  <div class="tabs" id="tabs">
+    <button data-v="proceso" class="act">Proceso</button>
+    <button data-v="rf1">Filtros · RF1</button>
+    <button data-v="ctr">Control · CTR14</button>
+  </div>
+
+  <div class="vista" id="v_proceso">
   <div class="svgbox"><svg id="pid" viewBox="0 0 1560 596" xmlns="http://www.w3.org/2000/svg"></svg></div>
+  </div>
+
+  <div class="vista" id="v_rf1" hidden>
+    <div class="hmibox"><svg viewBox="0 0 1280 800" xmlns="http://www.w3.org/2000/svg">
+<style>@keyframes flx{0%,100%{opacity:.18}30%{opacity:1}}.flx{animation:flx 1.5s linear infinite}.f1{animation-delay:0s}.f2{animation-delay:.5s}.f3{animation-delay:1s}@media (prefers-reduced-motion:reduce){.flx{animation:none;opacity:.9}}</style>
+<rect width="1280" height="800" fill="#C2C7CF"/>
+<line x1="417.0" y1="577.0" x2="689.0" y2="577.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<line x1="1210.0" y1="461.0" x2="1210.0" y2="571.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="374.0" y1="127.0" x2="374.0" y2="188.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="358.0" cy="363.0" rx="69.0" ry="21.0" fill="#F5F6F8" stroke="#202630"/>
+<ellipse cx="357.0" cy="155.5" rx="69.0" ry="21.5" fill="#F5F6F8" stroke="#202630"/>
+<rect x="287.0" y="154.0" width="140.0" height="209.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/>
+<text x="200.0" y="712.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">TAQ.4.01</text>
+<line x1="37.0" y1="671.0" x2="157.0" y2="671.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="127.0" y1="610.0" x2="127.0" y2="671.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="38.0" y1="610.0" x2="128.0" y2="610.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="37.0" y1="80.0" x2="37.0" y2="671.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<rect x="142.0" y="535.0" width="138.0" height="152.0" fill="#F5F6F8" stroke="#C6CBD3"/><rect x="143.0" y="618.6" width="136.0" height="67.4" fill="#3A8EA8"/>
+<rect x="138.0" y="684.0" width="145.0" height="9.0" fill="#969CA6" stroke="#C6CBD3" stroke-width="1"/>
+<rect x="143.0" y="535.0" width="72.0" height="23.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/><text x="179.0" y="551.9" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle" font-weight="bold">0.00</text>
+<text x="168.5" y="531.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">LT.4.01</text>
+<circle cx="82.0" cy="607.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 82.0 607.5)"><path d="M76.3 599.3 L91.8 607.5 L76.3 615.7 Z" fill="#1A8066"/></g>
+<circle cx="82.0" cy="668.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 82.0 668.5)"><path d="M76.3 660.3 L91.8 668.5 L76.3 676.7 Z" fill="#1A8066"/></g>
+<line x1="260.0" y1="190.0" x2="480.0" y2="190.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M294.4 177.0 L311.5 186.1 L294.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M328.6 177.0 L311.5 186.1 L328.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="302.9" y1="186.1" x2="320.1" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="311.5" y1="173.5" x2="311.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="304.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M383.4 177.0 L400.5 186.1 L383.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M417.6 177.0 L400.5 186.1 L417.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="391.9" y1="186.1" x2="409.1" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="400.5" y1="173.5" x2="400.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="393.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="313.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.01</text>
+<text x="400.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.02</text>
+<line x1="260.0" y1="246.0" x2="480.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M294.4 233.0 L311.5 242.1 L294.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M328.6 233.0 L311.5 242.1 L328.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="302.9" y1="242.1" x2="320.1" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="311.5" y1="229.5" x2="311.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="304.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M383.4 233.0 L400.5 242.1 L383.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M417.6 233.0 L400.5 242.1 L417.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="391.9" y1="242.1" x2="409.1" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="400.5" y1="229.5" x2="400.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="393.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="313.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.03</text>
+<text x="400.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.04</text>
+<line x1="357.0" y1="300.0" x2="447.0" y2="300.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M383.4 287.0 L400.5 296.1 L383.4 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M417.6 287.0 L400.5 296.1 L417.6 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="391.9" y1="296.1" x2="409.1" y2="296.1" stroke="#F5F6F8" stroke-width="2"/><line x1="400.5" y1="283.5" x2="400.5" y2="287.0" stroke="#626A78" stroke-width="1"/><rect x="393.1" y="277.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="400.0" y="275.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.05</text>
+<ellipse cx="358.0" cy="385.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="357.0" y1="246.0" x2="358.0" y2="386.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="357.0" y1="354.0" x2="417.0" y2="354.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M373.4 341.0 L390.5 350.1 L373.4 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M407.6 341.0 L390.5 350.1 L407.6 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="381.9" y1="350.1" x2="399.1" y2="350.1" stroke="#F5F6F8" stroke-width="2"/><line x1="390.5" y1="337.5" x2="390.5" y2="341.0" stroke="#626A78" stroke-width="1"/><rect x="383.1" y="331.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="390.0" y="329.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.06</text>
+<ellipse cx="358.0" cy="132.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="357.0" y1="131.0" x2="357.0" y2="192.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="373.0" y1="126.0" x2="457.0" y2="126.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M383.4 113.0 L400.5 122.1 L383.4 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M417.6 113.0 L400.5 122.1 L417.6 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="391.9" y1="122.1" x2="409.1" y2="122.1" stroke="#F5F6F8" stroke-width="2"/><line x1="400.5" y1="109.5" x2="400.5" y2="113.0" stroke="#626A78" stroke-width="1"/><rect x="393.1" y="103.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="400.0" y="101.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.07</text>
+<line x1="457.0" y1="126.0" x2="457.0" y2="141.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="456.5" y="153.2" font-family="Tahoma, Verdana, sans-serif" font-size="20" fill="#202630" text-anchor="middle">Y</text>
+<line x1="415.0" y1="355.0" x2="417.0" y2="676.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="261.0" y1="81.0" x2="261.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="37.0" y1="80.0" x2="877.0" y2="80.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<text x="185.0" y="448.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">TAQ.4.02</text>
+<line x1="37.0" y1="412.0" x2="157.0" y2="412.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<line x1="127.0" y1="351.0" x2="127.0" y2="412.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<line x1="38.0" y1="351.0" x2="128.0" y2="351.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<text x="88.0" y="439.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BDO.4.02B</text>
+<rect x="142.0" y="307.0" width="79.0" height="116.0" fill="#F5F6F8" stroke="#C6CBD3"/><rect x="143.0" y="370.8" width="77.0" height="51.2" fill="#C2703A"/>
+<rect x="138.0" y="420.0" width="88.0" height="9.0" fill="#969CA6" stroke="#C6CBD3" stroke-width="1"/>
+<circle cx="82.0" cy="348.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 82.0 348.5)"><path d="M76.3 340.3 L91.8 348.5 L76.3 356.7 Z" fill="#1A8066"/></g>
+<circle cx="82.0" cy="409.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 82.0 409.5)"><path d="M76.3 401.3 L91.8 409.5 L76.3 417.7 Z" fill="#1A8066"/></g>
+<text x="229.0" y="341.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">H</text>
+<text x="229.0" y="400.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">L</text>
+<line x1="447.0" y1="301.0" x2="447.0" y2="441.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="480.0" y1="190.0" x2="480.0" y2="410.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="416.0" y1="476.0" x2="1032.0" y2="476.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="447.0" y1="440.0" x2="1063.0" y2="440.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="480.0" y1="409.0" x2="1130.0" y2="409.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="682.0" y1="127.0" x2="682.0" y2="188.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="666.0" cy="363.0" rx="69.0" ry="21.0" fill="#F5F6F8" stroke="#202630"/>
+<ellipse cx="665.0" cy="155.5" rx="69.0" ry="21.5" fill="#F5F6F8" stroke="#202630"/>
+<rect x="595.0" y="154.0" width="140.0" height="209.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/>
+<line x1="568.0" y1="190.0" x2="788.0" y2="190.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M602.4 177.0 L619.5 186.1 L602.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M636.6 177.0 L619.5 186.1 L636.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="611.0" y1="186.1" x2="628.0" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="619.5" y1="173.5" x2="619.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="612.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M691.4 177.0 L708.5 186.1 L691.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M725.6 177.0 L708.5 186.1 L725.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="700.0" y1="186.1" x2="717.0" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="708.5" y1="173.5" x2="708.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="701.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="621.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.08</text>
+<text x="708.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.09</text>
+<line x1="568.0" y1="246.0" x2="788.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M602.4 233.0 L619.5 242.1 L602.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M636.6 233.0 L619.5 242.1 L636.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="611.0" y1="242.1" x2="628.0" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="619.5" y1="229.5" x2="619.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="612.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M691.4 233.0 L708.5 242.1 L691.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M725.6 233.0 L708.5 242.1 L725.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="700.0" y1="242.1" x2="717.0" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="708.5" y1="229.5" x2="708.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="701.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="621.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.10</text>
+<text x="708.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.11</text>
+<line x1="665.0" y1="300.0" x2="755.0" y2="300.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M691.4 287.0 L708.5 296.1 L691.4 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M725.6 287.0 L708.5 296.1 L725.6 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="700.0" y1="296.1" x2="717.0" y2="296.1" stroke="#F5F6F8" stroke-width="2"/><line x1="708.5" y1="283.5" x2="708.5" y2="287.0" stroke="#626A78" stroke-width="1"/><rect x="701.1" y="277.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="708.0" y="275.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.12</text>
+<ellipse cx="666.0" cy="385.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="665.0" y1="246.0" x2="666.0" y2="386.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="665.0" y1="354.0" x2="725.0" y2="354.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M681.4 341.0 L698.5 350.1 L681.4 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M715.6 341.0 L698.5 350.1 L715.6 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="690.0" y1="350.1" x2="707.0" y2="350.1" stroke="#F5F6F8" stroke-width="2"/><line x1="698.5" y1="337.5" x2="698.5" y2="341.0" stroke="#626A78" stroke-width="1"/><rect x="691.1" y="331.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="698.0" y="329.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.13</text>
+<ellipse cx="666.0" cy="132.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="665.0" y1="131.0" x2="665.0" y2="192.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="681.0" y1="126.0" x2="765.0" y2="126.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M691.4 113.0 L708.5 122.1 L691.4 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M725.6 113.0 L708.5 122.1 L725.6 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="700.0" y1="122.1" x2="717.0" y2="122.1" stroke="#F5F6F8" stroke-width="2"/><line x1="708.5" y1="109.5" x2="708.5" y2="113.0" stroke="#626A78" stroke-width="1"/><rect x="701.1" y="103.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="708.0" y="101.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.14</text>
+<line x1="765.0" y1="126.0" x2="765.0" y2="141.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="764.5" y="153.2" font-family="Tahoma, Verdana, sans-serif" font-size="20" fill="#202630" text-anchor="middle">Y</text>
+<line x1="725.0" y1="355.0" x2="725.0" y2="476.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="569.0" y1="81.0" x2="569.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="755.0" y1="301.0" x2="755.0" y2="441.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="788.0" y1="190.0" x2="788.0" y2="410.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="990.0" y1="127.0" x2="990.0" y2="188.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<ellipse cx="974.0" cy="363.0" rx="69.0" ry="21.0" fill="#F5F6F8" stroke="#202630"/>
+<ellipse cx="973.0" cy="155.5" rx="69.0" ry="21.5" fill="#F5F6F8" stroke="#202630"/>
+<rect x="903.0" y="154.0" width="140.0" height="209.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/>
+<line x1="876.0" y1="190.0" x2="1096.0" y2="190.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M910.4 177.0 L927.5 186.1 L910.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M944.6 177.0 L927.5 186.1 L944.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="919.0" y1="186.1" x2="936.0" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="927.5" y1="173.5" x2="927.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="920.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M999.4 177.0 L1016.5 186.1 L999.4 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1033.6 177.0 L1016.5 186.1 L1033.6 195.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1008.0" y1="186.1" x2="1025.0" y2="186.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1016.5" y1="173.5" x2="1016.5" y2="177.0" stroke="#626A78" stroke-width="1"/><rect x="1009.1" y="167.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="929.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.15</text>
+<text x="1016.0" y="165.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.16</text>
+<line x1="876.0" y1="246.0" x2="1096.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M910.4 233.0 L927.5 242.1 L910.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M944.6 233.0 L927.5 242.1 L944.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="919.0" y1="242.1" x2="936.0" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="927.5" y1="229.5" x2="927.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="920.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<path d="M999.4 233.0 L1016.5 242.1 L999.4 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1033.6 233.0 L1016.5 242.1 L1033.6 251.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1008.0" y1="242.1" x2="1025.0" y2="242.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1016.5" y1="229.5" x2="1016.5" y2="233.0" stroke="#626A78" stroke-width="1"/><rect x="1009.1" y="223.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="929.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.17</text>
+<text x="1016.0" y="221.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.18</text>
+<line x1="973.0" y1="300.0" x2="1063.0" y2="300.0" stroke="#1A8066" stroke-width="2" stroke-linecap="round"/>
+<path d="M999.4 287.0 L1016.5 296.1 L999.4 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1033.6 287.0 L1016.5 296.1 L1033.6 305.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1008.0" y1="296.1" x2="1025.0" y2="296.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1016.5" y1="283.5" x2="1016.5" y2="287.0" stroke="#626A78" stroke-width="1"/><rect x="1009.1" y="277.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="1016.0" y="275.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.19</text>
+<ellipse cx="974.0" cy="385.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="973.0" y1="246.0" x2="974.0" y2="386.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="973.0" y1="354.0" x2="1033.0" y2="354.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M989.4 341.0 L1006.5 350.1 L989.4 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1023.6 341.0 L1006.5 350.1 L1023.6 359.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="998.0" y1="350.1" x2="1015.0" y2="350.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1006.5" y1="337.5" x2="1006.5" y2="341.0" stroke="#626A78" stroke-width="1"/><rect x="999.1" y="331.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="1006.0" y="329.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.20</text>
+<ellipse cx="974.0" cy="132.0" rx="5.0" ry="5.0" fill="#F5F6F8" stroke="#202630"/>
+<line x1="973.0" y1="131.0" x2="973.0" y2="192.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="989.0" y1="126.0" x2="1073.0" y2="126.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M999.4 113.0 L1016.5 122.1 L999.4 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1033.6 113.0 L1016.5 122.1 L1033.6 131.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1008.0" y1="122.1" x2="1025.0" y2="122.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1016.5" y1="109.5" x2="1016.5" y2="113.0" stroke="#626A78" stroke-width="1"/><rect x="1009.1" y="103.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="1016.0" y="101.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.21</text>
+<line x1="1073.0" y1="126.0" x2="1073.0" y2="141.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="1072.5" y="153.2" font-family="Tahoma, Verdana, sans-serif" font-size="20" fill="#202630" text-anchor="middle">Y</text>
+<line x1="1033.0" y1="355.0" x2="1033.0" y2="476.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="877.0" y1="81.0" x2="877.0" y2="246.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="1063.0" y1="301.0" x2="1065.0" y2="520.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="1096.0" y1="190.0" x2="1096.0" y2="410.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="715.0" y1="440.0" x2="735.0" y2="440.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="716.0" y1="409.0" x2="736.0" y2="409.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="745.0" y1="409.0" x2="765.0" y2="409.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="1024.0" y1="409.0" x2="1044.0" y2="409.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="1054.0" y1="409.0" x2="1074.0" y2="409.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="1024.0" y1="440.0" x2="1044.0" y2="440.0" stroke="#C6CBD3" stroke-width="1" stroke-linecap="round"/>
+<line x1="1130.0" y1="352.0" x2="1130.0" y2="462.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="1130.0" y1="352.0" x2="1240.0" y2="352.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M1144.4 339.0 L1161.5 348.1 L1144.4 357.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1178.6 339.0 L1161.5 348.1 L1178.6 357.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1153.0" y1="348.1" x2="1170.0" y2="348.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1161.5" y1="335.5" x2="1161.5" y2="339.0" stroke="#626A78" stroke-width="1"/><rect x="1154.1" y="329.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="1161.0" y="327.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.23</text>
+<line x1="1210.0" y1="500.0" x2="1210.0" y2="510.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="1130.0" y1="461.0" x2="1210.0" y2="461.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<path d="M1144.4 448.0 L1161.5 457.1 L1144.4 466.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><path d="M1178.6 448.0 L1161.5 457.1 L1178.6 466.2 Z" fill="#1A8066" stroke="#202630" stroke-width="1"/><line x1="1153.0" y1="457.1" x2="1170.0" y2="457.1" stroke="#F5F6F8" stroke-width="2"/><line x1="1161.5" y1="444.5" x2="1161.5" y2="448.0" stroke="#626A78" stroke-width="1"/><rect x="1154.1" y="438.9" width="14.8" height="5.6" fill="#1A8066" stroke="#202630" stroke-width="1"/>
+<text x="1161.0" y="436.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">FCV.4.22</text>
+<line x1="1234.0" y1="555.0" x2="1244.0" y2="555.0" stroke="#F5F6F8" stroke-width="1" stroke-linecap="round"/>
+<text x="1164.0" y="714.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">TAQ.4.04</text>
+<line x1="903.0" y1="672.0" x2="1121.0" y2="672.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="1091.0" y1="612.0" x2="1091.0" y2="673.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="1002.0" y1="612.0" x2="1092.0" y2="612.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<rect x="1106.0" y="537.0" width="138.0" height="152.0" fill="#F5F6F8" stroke="#C6CBD3"/><rect x="1107.0" y="620.6" width="136.0" height="67.4" fill="#3A8EA8"/>
+<rect x="1102.0" y="686.0" width="145.0" height="9.0" fill="#969CA6" stroke="#C6CBD3" stroke-width="1"/>
+<rect x="1107.0" y="537.0" width="75.0" height="23.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/><text x="1144.5" y="553.9" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle" font-weight="bold">0.00</text>
+<text x="1132.5" y="533.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">LT.4.04</text>
+<circle cx="1046.0" cy="609.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 1046.0 609.5)"><path d="M1040.3 601.3 L1055.8 609.5 L1040.3 617.7 Z" fill="#1A8066"/></g>
+<line x1="1042.0" y1="613.0" x2="1048.0" y2="613.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<circle cx="1046.0" cy="670.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 1046.0 670.5)"><path d="M1040.3 662.3 L1055.8 670.5 L1040.3 678.7 Z" fill="#1A8066"/></g>
+<line x1="1002.0" y1="613.0" x2="1002.0" y2="674.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="896.0" y1="672.0" x2="906.0" y2="672.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="931.0" y="663.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">TAQ.5.13</text>
+<line x1="975.0" y1="518.0" x2="1065.0" y2="518.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<line x1="965.0" y1="518.0" x2="975.0" y2="518.0" stroke="#1A8066" stroke-width="3" stroke-linecap="round"/>
+<text x="988.5" y="507.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">RO1</text>
+<text x="718.0" y="625.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">TAQ.4.03</text>
+<line x1="645.0" y1="513.0" x2="645.0" y2="578.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<line x1="556.0" y1="512.0" x2="646.0" y2="512.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<rect x="675.0" y="488.0" width="79.0" height="112.0" fill="#F5F6F8" stroke="#C6CBD3"/><rect x="676.0" y="549.6" width="77.0" height="49.4" fill="#3A8EA8"/>
+<rect x="671.0" y="597.0" width="88.0" height="9.0" fill="#969CA6" stroke="#C6CBD3" stroke-width="1"/>
+<circle cx="600.0" cy="509.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 600.0 509.5)"><path d="M594.3 501.3 L609.8 509.5 L594.3 517.7 Z" fill="#1A8066"/></g>
+<circle cx="600.0" cy="574.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(180 600.0 574.5)"><path d="M594.3 566.3 L609.8 574.5 L594.3 582.7 Z" fill="#1A8066"/></g>
+<text x="762.0" y="518.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">H</text>
+<text x="762.0" y="577.4" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle">L</text>
+<line x1="417.0" y1="676.0" x2="700.0" y2="676.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="507.0" y1="613.0" x2="507.0" y2="676.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="418.0" y1="612.0" x2="508.0" y2="612.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<circle cx="462.0" cy="609.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(0 462.0 609.5)"><path d="M456.3 601.3 L471.8 609.5 L456.3 617.7 Z" fill="#1A8066"/></g>
+<circle cx="462.0" cy="673.5" r="16.4" fill="#F5F6F8" stroke="#1A8066" stroke-width="3"/><g transform="rotate(0 462.0 673.5)"><path d="M456.3 665.3 L471.8 673.5 L456.3 681.7 Z" fill="#1A8066"/></g>
+<line x1="556.0" y1="513.0" x2="556.0" y2="577.0" stroke="#3A8EA8" stroke-width="1" stroke-linecap="round"/>
+<line x1="702.0" y1="676.0" x2="712.0" y2="676.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="667.5" y="663.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">Reuse Water</text>
+<line x1="290.0" y1="566.0" x2="351.0" y2="566.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="280.0" y1="566.0" x2="290.0" y2="566.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="328.5" y="555.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">MBR Permeate</text>
+<line x1="323.0" y1="499.0" x2="413.0" y2="499.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="403.0" y1="499.0" x2="413.0" y2="499.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="368.5" y="491.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">RO CIP</text>
+<line x1="38.0" y1="131.0" x2="38.0" y2="141.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<line x1="598.0" y1="513.0" x2="604.0" y2="513.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="597.0" y1="577.0" x2="603.0" y2="577.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="459.0" y1="613.0" x2="465.0" y2="613.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="458.0" y1="677.0" x2="464.0" y2="677.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="1043.0" y1="673.0" x2="1049.0" y2="673.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="79.0" y1="413.0" x2="85.0" y2="413.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="79.0" y1="351.0" x2="85.0" y2="351.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="78.0" y1="610.0" x2="84.0" y2="610.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<line x1="78.0" y1="672.0" x2="84.0" y2="672.0" stroke="#202630" stroke-width="1" stroke-linecap="round"/>
+<text x="88.5" y="378.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BDO.4.02A</text>
+<text x="88.0" y="637.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.01A</text>
+<text x="87.5" y="698.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.01B</text>
+<text x="606.0" y="540.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.03A</text>
+<text x="607.5" y="604.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.03B</text>
+<text x="469.0" y="639.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.05A</text>
+<text x="469.5" y="703.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.05B</text>
+<text x="1052.5" y="639.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.04A</text>
+<text x="1056.0" y="700.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">BCE.4.04B</text>
+<rect x="71.0" y="99.0" width="92.0" height="23.0" fill="#F5F6F8" stroke="#C6CBD3" stroke-width="1"/><text x="117.0" y="115.9" font-family="Tahoma, Verdana, sans-serif" font-size="15" fill="#202630" text-anchor="middle" font-weight="bold">0.00</text>
+<text x="103.0" y="95.7" font-family="Tahoma, Verdana, sans-serif" font-size="13" fill="#202630" text-anchor="middle">ORP.4.01</text>
+<line x1="1239.0" y1="353.0" x2="1239.0" y2="368.0" stroke="#7A889E" stroke-width="1" stroke-linecap="round"/>
+<text x="1238.5" y="380.2" font-family="Tahoma, Verdana, sans-serif" font-size="20" fill="#202630" text-anchor="middle">Y</text>
+<g id="ovRF1"></g></svg></div>
+    <p class="nota">Pantalla RF1 del HMI. Toca un equipo para ver su estado. Solo lectura: esta pagina no manda ordenes.</p>
+  </div>
+
+  <div class="vista" id="v_ctr" hidden>
+    <div class="hmibox"><svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg"><rect width="1280" height="720" fill="#C2C7CF"/><g id="ovCTR"></g></svg></div>
+    <p class="nota" id="notaCTR">Pantalla CTR14 del HMI.</p>
+  </div>
+    <p class="nota" id="notaCTR">Pantalla CTR14 del HMI.</p>
+  </div>
+
 </main>
+
+
+<div class="modal" id="modalMV" hidden>
+  <div class="mv">
+    <h3><b id="mvTag">—</b><span id="mvX">&times;</span></h3>
+    <div class="chips">
+      <div class="chip" id="mvRmt">Remote</div>
+      <div class="chip" id="mvRun">Runing</div>
+      <div class="chip" id="mvFlt">Fault</div>
+      <div class="chip" id="mvOut">Out</div>
+    </div>
+    <div class="filas" id="mvFilas"></div>
+    <div class="pie" id="mvPie"></div>
+  </div>
+</div>
 
 <footer>Los datos llegan por MQTT desde el CBOX. Esta página solo lee: no puede mandar órdenes a la planta.</footer>
 
@@ -674,7 +955,7 @@ function pinta(bruto){
   }
   marcaSiRaro('PH501', v=>v<0||v>14);
   marcaSiRaro('PH506', v=>v<0||v>14);
-  pintaEquipos(obj); pintaValvulas(obj);
+  pintaEquipos(obj); pintaValvulas(obj); pintaHMI(obj);
   if(obj.step!==undefined) pintaEstado(obj);
   ultimoDato=Date.now();
 }
@@ -806,6 +1087,264 @@ document.getElementById('btnTema').onclick=()=>{
   try{ localStorage.setItem('ro_tema', oscuro?'light':'dark'); }catch(e){}
 };
 try{ const t=localStorage.getItem('ro_tema'); if(t) document.documentElement.setAttribute('data-theme',t); }catch(e){}
+
+/* ============================================================
+   Vistas del HMI de planta: RF1 y CTR14.
+   La geometria es la de los SVG *_nueva del artifact "Maquetas
+   pantalla por pantalla" (22-oct), que a su vez salieron de la
+   exportacion real del HMI: coinciden al pixel.
+   El mapa posicion -> equipo viene de RF1_Propuesta_Claude.xml,
+   donde cada icono abre el popup MV con su tag MVn, y MVn es
+   DB1.DBW(2n). Los 33 resuelven contra variables publicadas.
+   ============================================================ */
+const COL={abierta:'#00FF00', marcha:'#008200', falla:'#FF0000',
+           aviso:'#FFFF00', manual:'#8E4296', parado:'#969CA6'};
+
+const RF1 = [{"t":"BDO402A","x":54,"y":328,"w":56,"h":41,"k":"m"},{"t":"BDO402B","x":54,"y":389,"w":56,"h":41,"k":"m"},{"t":"BCE403A","x":572,"y":489,"w":56,"h":41,"k":"m"},{"t":"BCE403B","x":572,"y":554,"w":56,"h":41,"k":"m"},{"t":"BCE405A","x":434,"y":589,"w":56,"h":41,"k":"m"},{"t":"BCE405B","x":434,"y":653,"w":56,"h":41,"k":"m"},{"t":"BCE404A","x":1018,"y":589,"w":56,"h":41,"k":"m"},{"t":"BCE404B","x":1018,"y":650,"w":56,"h":41,"k":"m"},{"t":"BCE401A","x":54,"y":587,"w":56,"h":41,"k":"m"},{"t":"BCE401B","x":54,"y":648,"w":56,"h":41,"k":"m"},{"t":"FCV401","x":283,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV402","x":372,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV403","x":283,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV404","x":372,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV405","x":372,"y":273,"w":57,"h":35,"k":"v"},{"t":"FCV406","x":362,"y":327,"w":57,"h":35,"k":"v"},{"t":"FCV407","x":372,"y":99,"w":57,"h":35,"k":"v"},{"t":"FCV422","x":1133,"y":434,"w":57,"h":35,"k":"v"},{"t":"FCV423","x":1133,"y":325,"w":57,"h":35,"k":"v"},{"t":"FCV408","x":591,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV409","x":680,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV410","x":591,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV411","x":680,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV412","x":680,"y":273,"w":57,"h":35,"k":"v"},{"t":"FCV413","x":670,"y":327,"w":57,"h":35,"k":"v"},{"t":"FCV414","x":680,"y":99,"w":57,"h":35,"k":"v"},{"t":"FCV415","x":899,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV416","x":988,"y":163,"w":57,"h":35,"k":"v"},{"t":"FCV417","x":899,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV418","x":988,"y":219,"w":57,"h":35,"k":"v"},{"t":"FCV419","x":988,"y":273,"w":57,"h":35,"k":"v"},{"t":"FCV420","x":978,"y":327,"w":57,"h":35,"k":"v"},{"t":"FCV421","x":988,"y":99,"w":57,"h":35,"k":"v"}];
+
+/* cdn de RO1 segun Bloques-PLC-Principal.md; el orden coincide con la
+   lista que dibuja el propio HMI en CTR14, comprobado uno a uno. */
+
+function elS(t,a,p){const e=document.createElementNS(NS,t);
+  for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e;}
+
+/* ---------- RF1 ---------- */
+function montaRF1(){
+  const ov=document.getElementById('ovRF1'); if(!ov) return;
+  RF1.forEach(q=>{
+    const g=elS('g',{class:'hs', id:'hs_'+q.t},ov);
+    elS('rect',{x:q.x,y:q.y,width:q.w,height:q.h,rx:5,class:'caz',
+                fill:COL.parado,'fill-opacity':.001,stroke:COL.parado,
+                'stroke-width':2,'stroke-opacity':.55},g);
+    g.addEventListener('click',()=>abreMV(q.t));
+  });
+  /* Lecturas analogicas, en las mismas casillas que ocupan en el HMI real
+     (IOField de la RF1 exportada: LT401 143,535 · LT404 1107,537 · ORP401 71,99). */
+  const campo=(x,y,w,id)=>{
+    elS('rect',{x:x,y:y,width:w,height:24,rx:3,fill:'#F5F6F8',
+                stroke:'#A6ADB8','stroke-width':1},ov);
+    const t=elS('text',{x:x+w-7,y:y+17,'font-family':'Consolas,monospace','font-size':14,
+                'font-weight':'bold',fill:'#202630','text-anchor':'end',id:id},ov);
+    t.textContent='--';
+  };
+  campo(143,535,76,'rf1_LT401');
+  campo(1107,537,78,'rf1_LT404');
+  campo(71,99,96,'rf1_ORP401');
+}
+function pintaRF1(o){
+  RF1.forEach(q=>{
+    const g=document.getElementById('hs_'+q.t); if(!g) return;
+    const r=g.firstChild, v=o[q.t];
+    if(v===undefined) return;
+    const w=Number(v);
+    const falla=bitDe(w,M.FLT)||bitDe(w,M.Bad);
+    const manual=!bitDe(w,M.RMT);
+    const activo=q.k==='v' ? bitDe(w,M.OPN) : bitDe(w,M.Runing);
+    let c=COL.parado, op=.12;
+    if(falla){ c=COL.falla; op=.42; }
+    else if(manual){ c=COL.manual; op=.3; }
+    else if(activo){ c=(q.k==='v'?COL.abierta:COL.marcha); op=.42; }
+    r.setAttribute('fill',c); r.setAttribute('fill-opacity',op);
+    r.setAttribute('stroke',c); r.setAttribute('stroke-opacity',falla||activo?1:.5);
+  });
+  /* analogicos de la pantalla, en las posiciones del HMI real */
+  texto('rf1_LT401', o.LT401, 'm');
+  texto('rf1_LT404', o.LT404, 'm');
+  texto('rf1_ORP401', o.ORP401, 'mV');
+}
+function texto(id,v,u){
+  const e=document.getElementById(id); if(!e) return;
+  e.textContent = (v===undefined||v===null) ? '--' : fmt(v)+' '+u;
+}
+
+/* ============================================================
+   CTR14 — panel de estado, redibujado desde la pantalla real.
+   La maqueta del artifact solo traia marcos vacios en lugar de
+   los faceplates, asi que aqui se dibuja el contenido entero.
+   ============================================================ */
+const SF_RUN  = [[0,'Stoped'],[11,'Waiting run'],[12,'Running']];
+const SF_WASH = [[20,'Waiting backwash'],[21,'Backwashing'],[22,'Regenerative'],
+                 [23,'Waiting'],[24,'Collecin'],[25,'Drain 2'],[26,'Feed water']];
+const RO_STEP = [['Stoped',p=>p===0],['Waiting run',p=>p>=10&&p<=11],
+                 ['Starting',p=>p>=12&&p<=14],['Running',p=>p===15],
+                 ['Flushing',p=>p>=21&&p<=27]];
+/* etiqueta, bit de cdn, polaridad: 'p' permisivo (1 = cumplida), 't' disparo */
+const COND = [['Process request',8,'p'],['Dosing level',9,'p'],['Motors & valves',10,'p'],
+              ['PSL.5.01',11,'t'],['E-STOP',15,'t'],['Filter timeout',0,'t'],
+              ['pH.5.01',1,'t'],['ORP.4.01',2,'t'],['Action timeout',3,'t']];
+
+function montaCTR(){
+  const ov=document.getElementById('ovCTR'); if(!ov) return;
+  while(ov.firstChild) ov.removeChild(ov.firstChild);
+  const T=(x,y,s,o)=>{const t=elS('text',Object.assign({x:x,y:y,
+      'font-family':'Tahoma,sans-serif','font-size':12,fill:'#202630'},o||{}),ov);
+      t.textContent=s; return t;};
+  const lampara=(x,y,w,s,id)=>{
+    elS('rect',{x:x,y:y,width:w,height:20,rx:3,fill:'#D7DBE1',
+                stroke:'#A6ADB8','stroke-width':1,id:'L_'+id},ov);
+    T(x+w/2,y+14,s,{'text-anchor':'middle','font-size':11,id:'LT_'+id});
+  };
+  const valor=(x,y,w,id,suf)=>{
+    elS('rect',{x:x,y:y,width:w,height:20,rx:3,fill:'#F5F6F8',
+                stroke:'#A6ADB8','stroke-width':1},ov);
+    T(x+w-6,y+14,'-- '+suf,{'text-anchor':'end','font-family':'Consolas,monospace',
+                            'font-size':11,'font-weight':'bold',id:id});
+  };
+  const marco=(x,y,w,h,tit)=>{
+    elS('rect',{x:x,y:y,width:w,height:h,rx:6,fill:'#E6E9ED',
+                stroke:'#A6ADB8','stroke-width':1},ov);
+    T(x+w/2,y+18,tit,{'text-anchor':'middle','font-size':14,'font-weight':'bold',
+                      fill:'#2C3442'});
+  };
+
+  /* ---- los tres suavizadores ---- */
+  [['F1',24],['F2',336],['F3',648]].forEach(([k,x])=>{
+    marco(x,84,296,300,'Softening filter '+k[1]);
+    elS('rect',{x:x+208,y:90,width:82,height:19,rx:3,fill:'#969CA6',id:'chip_'+k},ov);
+    T(x+249,104,'--',{'text-anchor':'middle','font-size':11,fill:'#202630',id:'chipT_'+k});
+    T(x+76,40+76,'Run status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    T(x+218,40+76,'Backwash status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    SF_RUN.forEach(([p,s],i)=>lampara(x+14,124+i*24,124,s,k+'r'+p));
+    valor(x+14,124+3*24,124,'v_'+k+'min','Min');
+    SF_WASH.forEach(([p,s],i)=>lampara(x+152,124+i*24,130,s,k+'w'+p));
+    valor(x+152,124+7*24,130,'v_'+k+'sec','Seg');
+  });
+
+  /* ---- RO1 ---- */
+  marco(24,400,620,290,'RO1');
+  T(90,434,'Step status',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+  RO_STEP.forEach(([s],i)=>lampara(30,444+i*26,122,s,'ro'+i));
+  valor(30,444+5*26,122,'v_ROmin','Min');
+  valor(30,444+6*26,122,'v_ROsec','Seg');
+  T(400,434,'Start up conditions',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+  COND.forEach(([s,bit],i)=>
+    lampara(166+(i%3)*158,444+Math.floor(i/3)*26,150,s,'c'+bit));
+  elS('rect',{x:166,y:444+3*26,width:466,height:56,rx:4,fill:'#F5F6F8',
+              stroke:'#A6ADB8','stroke-width':1},ov);
+  T(178,444+3*26+20,'Causa del ultimo paro',{'font-size':11,fill:'#626A78'});
+  T(178,444+3*26+42,'--',{'font-size':15,'font-weight':'bold',fill:'#202630',id:'v_causa'});
+
+  /* ---- RO2: existe en la pantalla real, pero el tren esta fuera ---- */
+  marco(664,400,592,290,'RO2');
+  T(960,545,'fuera de servicio',{'text-anchor':'middle','font-size':15,fill:'#7A889E'});
+  T(960,567,'no se publican sus variables',{'text-anchor':'middle','font-size':12,
+                                            fill:'#969CA6'});
+  /* ---- ablandamiento quimico: area 600, no es nuestra ---- */
+  marco(664,84,592,300,'Chemical softener');
+  T(960,230,'area 600 - sin variables publicadas',
+    {'text-anchor':'middle','font-size':13,fill:'#7A889E'});
+}
+
+function enciende(id,on,malo){
+  const r=document.getElementById('L_'+id), t=document.getElementById('LT_'+id);
+  if(!r) return;
+  r.setAttribute('fill', on?(malo?COL.falla:COL.marcha):'#D7DBE1');
+  if(t) t.setAttribute('fill', on?'#FFFFFF':'#202630');
+}
+
+function pintaCTR(o){
+  [['F1'],['F2'],['F3']].forEach(([k])=>{
+    if(o[k]===undefined) return;
+    const p=Number(o[k]);
+    SF_RUN.forEach(([s])=>enciende(k+'r'+s, p===s || (s===12&&p===12)));
+    SF_WASH.forEach(([s])=>enciende(k+'w'+s, p===s));
+    const ch=document.getElementById('chip_'+k), ct=document.getElementById('chipT_'+k);
+    if(ch&&ct){
+      const serv=p>=11&&p<=12, reg=p>=20&&p<=27;
+      ch.setAttribute('fill', serv?COL.marcha:(reg?COL.aviso:COL.parado));
+      ct.setAttribute('fill', serv?'#fff':'#202630');
+      ct.textContent = serv?'En servicio':(reg?'Regenerando':'Standby');
+    }
+  });
+  [['F1run','v_F1min'],['F2run','v_F2min'],['F3run','v_F3min']].forEach(([k,id])=>{
+    const e=document.getElementById(id);
+    if(e&&o[k]!==undefined) e.textContent=Number(o[k])+' Min';
+  });
+  if(o.step!==undefined){
+    const p=Number(o.step);
+    RO_STEP.forEach(([s,fn],i)=>enciende('ro'+i, fn(p)));
+  }
+  if(o.run_min!==undefined){
+    const e=document.getElementById('v_ROmin');
+    if(e) e.textContent=Number(o.run_min)+' Min';
+  }
+  if(o.codigo!==undefined){
+    const c=Number(o.codigo), e=document.getElementById('v_causa');
+    if(e) e.textContent=(CAUSAS[c]||('codigo '+c))+'  ('+c+')';
+  }
+  const n=document.getElementById('notaCTR');
+  if(o.RO1cdn===undefined){
+    if(n) n.textContent='Pantalla CTR14 del HMI. Las condiciones de arranque necesitan '+
+      'la clave RO1cdn, que todavia no llega: falta descargar el proyecto al CBOX. '+
+      'Los tiempos por paso (Seg) no se publican.';
+    return;
+  }
+  const w=Number(o.RO1cdn);
+  COND.forEach(([s,bit,pol])=>{
+    const b=bitDe(w,bit);
+    const bien = (pol==='p') ? b : !b;
+    enciende('c'+bit, true, !bien);
+  });
+  if(n) n.textContent='Pantalla CTR14 del HMI. Verde = condicion cumplida, rojo = condicion '+
+    'que impide o aborta la marcha. Los tres primeros son permisivos (1 = bien) y el resto '+
+    'disparos (1 = mal); la polaridad de PSL.5.01 no esta verificada. El offset de RO1cdn '+
+    '(DB1.228) es deducido. Los tiempos por paso (Seg) no se publican.';
+}
+
+/* ---------- detalle de equipo ---------- */
+function abreMV(tag){
+  const w=valores[tag];
+  document.getElementById('mvTag').textContent=tag;
+  const chip=(id,on,cls)=>{const e=document.getElementById(id);
+    e.className='chip'+(on?(' '+(cls||'on')):'');};
+  const filas=document.getElementById('mvFilas');
+  while(filas.firstChild) filas.removeChild(filas.firstChild);
+  const pie=document.getElementById('mvPie');
+  if(w===undefined){
+    chip('mvRmt',false); chip('mvRun',false); chip('mvFlt',false); chip('mvOut',false);
+    pie.textContent='Sin dato todavia para '+tag+'.';
+  }else{
+    const n=Number(w), es_v=tag.indexOf('FCV')===0;
+    const falla=bitDe(n,M.FLT)||bitDe(n,M.Bad);
+    chip('mvRmt',bitDe(n,M.RMT));
+    chip('mvRun',es_v?bitDe(n,M.OPN):bitDe(n,M.Runing));
+    chip('mvFlt',falla,'mal');
+    chip('mvOut',bitDe(n,M.ON));
+    [['Modo', bitDe(n,M.RMT)?'Remoto':'Manual'],
+     [es_v?'Abierta':'En marcha', (es_v?bitDe(n,M.OPN):bitDe(n,M.Runing))?'si':'no'],
+     ['Orden (CMD)', bitDe(n,M.CMD)?'si':'no'],
+     ['Listo (RDY)', bitDe(n,M.RDY)?'si':'no'],
+     ['Fallo (FLT)', bitDe(n,M.FLT)?'SI':'no'],
+     ['Averiado (Bad)', bitDe(n,M.Bad)?'SI':'no'],
+     ['Palabra', n+'  (0x'+n.toString(16).toUpperCase()+')']].forEach(([a,b])=>{
+      const f=document.createElement('div'); f.className='f';
+      const s1=document.createElement('span'); s1.textContent=a;
+      const s2=document.createElement('b'); s2.textContent=b;
+      f.appendChild(s1); f.appendChild(s2); filas.appendChild(f);
+    });
+    pie.textContent='Leido de la palabra de estado del PLC. Solo lectura.';
+  }
+  document.getElementById('modalMV').hidden=false;
+}
+document.getElementById('mvX').onclick=()=>document.getElementById('modalMV').hidden=true;
+document.getElementById('modalMV').onclick=e=>{
+  if(e.target.id==='modalMV') document.getElementById('modalMV').hidden=true;};
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') document.getElementById('modalMV').hidden=true;});
+
+/* ---------- pestanas ---------- */
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('act',x===b));
+  const v=b.dataset.v;
+  document.getElementById('v_proceso').hidden = v!=='proceso';
+  document.getElementById('v_rf1').hidden     = v!=='rf1';
+  document.getElementById('v_ctr').hidden     = v!=='ctr';
+});
+
+montaRF1(); montaCTR();
+function pintaHMI(o){ pintaRF1(o); pintaCTR(o); }
+
 </script>
 </body>
 </html>
