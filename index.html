@@ -979,6 +979,17 @@ function dibujaRF1(){
      de regeneracion. Antes colgaba a y=506 sin tocarlas. */
   const HFEED=72, HDREN=442, HCOL=474, HREG=398;
 
+  /* Descarga abierta: la "Y" que dibuja el HMI al final de FCV-4.23. */
+  const simboloY=(x,y)=>{
+    el('path',{d:'M'+(x-9)+','+y+' L'+x+','+(y+11)+' L'+(x+9)+','+y,
+               fill:'none',stroke:'var(--trazo)','stroke-width':1.6,
+               'stroke-linecap':'round','stroke-linejoin':'round',
+               opacity:.7,class:'termY'},gP);
+    el('path',{d:'M'+x+','+(y+11)+' v11',fill:'none',stroke:'var(--trazo)',
+               'stroke-width':1.6,'stroke-linecap':'round',opacity:.7,
+               class:'termY'},gP);
+  };
+
   /* terminador: punta y rotulo. Una linea o conecta, o acaba asi. */
   const fin=(x,y,dir,label)=>{
     const d = dir==='up'   ? 'M'+x+','+y+' l-5,9 h10 z'
@@ -1008,18 +1019,18 @@ function dibujaRF1(){
      el HMI, 100 px por encima de los colectores: la linea sube a buscarlas
      y sale por detras de cada una. Antes quedaban colgadas. */
   P('drenV',[[1120,HDREN],[1120,343],[1151,343]],'drain');
-  P('dren',[[1172,343],[1196,343]],'drain');
+  P('dren',[[1172,343],[1212,343],[1212,372]],'drain');
   /* El servicio va de los efluentes directo a RO1: la valvula de esa linea
      es FCV-5.02, que esta en el diagrama de Proceso. Con la planta
      produciendo, FCV-4.22 (coleccion) esta CERRADA, asi que no cuelga de
      aqui: se lleva a su propio ramal de coleccion. */
-  P('ro1',[[1120,HCOL],[1196,HCOL]],'perm');
+  P('ro1',[[1120,HCOL],[1226,HCOL]],'perm');
   P('colV',[[1120,HDREN],[1120,452],[1151,452]],'drain',true);
   /* FCV-4.22 no sale del dibujo: descarga DENTRO de TAQ-4.04, que es el
      tanque de agua de regeneracion. La 4.23 si va a drenaje. */
   P('colOut',[[1172,452],[1200,452],[1200,537]],'cip',true);
-  fin(1200,343,'right','a drenaje');
-  fin(1200,HCOL,'right','a RO1');
+  simboloY(1212,372);
+  fin(1230,HCOL,'right','a RO1');
 
   /* --- por suavizador --- */
   SF.forEach(s=>{
