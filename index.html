@@ -1258,6 +1258,12 @@ function montaCTR(){
     T(x+w-6,y+14,'-- '+suf,{'text-anchor':'end','font-family':'Consolas,monospace',
                             'font-size':11,'font-weight':'bold',id:id});
   };
+  /* Pulsador del HMI, dibujado apagado: esta pagina no manda ordenes. */
+  const boton=(x,y,et,col)=>{
+    elS('circle',{cx:x,cy:y,r:13,fill:'none',stroke:col,'stroke-width':2,
+                  opacity:.45},ov);
+    T(x,y+32,et,{'text-anchor':'middle','font-size':10,fill:'#7A889E'});
+  };
   const marco=(x,y,w,h,tit)=>{
     elS('rect',{x:x,y:y,width:w,height:h,rx:6,fill:'#E6E9ED',
                 stroke:'#A6ADB8','stroke-width':1},ov);
@@ -1276,6 +1282,10 @@ function montaCTR(){
     valor(x+14,124+3*24,124,'v_'+k+'min','Min');
     SF_WASH.forEach(([p,s],i)=>lampara(x+152,124+i*24,130,s,k+'w'+p));
     valor(x+152,124+7*24,130,'v_'+k+'sec','Seg');
+    /* "Backwash cmd" del HMI. Aqui NO son botones: el tablero solo lee, asi
+       que van apagados y con el contorno de su color, no rellenos. */
+    T(x+76,250,'Backwash cmd',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+    boton(x+46,278,'Start','#1A8066'); boton(x+106,278,'Stop','#C42626');
   });
 
   /* ---- RO1 ---- */
@@ -1291,16 +1301,35 @@ function montaCTR(){
               stroke:'#A6ADB8','stroke-width':1},ov);
   T(178,444+3*26+20,'Causa del ultimo paro',{'font-size':11,fill:'#626A78'});
   T(178,444+3*26+42,'--',{'font-size':15,'font-weight':'bold',fill:'#202630',id:'v_causa'});
+  boton(240,618,'Start','#1A8066'); boton(390,618,'Reset','#3A4252');
+  boton(540,618,'Stop','#C42626');
 
   /* ---- RO2: existe en la pantalla real, pero el tren esta fuera ---- */
   marco(664,400,592,290,'RO2');
   T(960,545,'fuera de servicio',{'text-anchor':'middle','font-size':15,fill:'#7A889E'});
   T(960,567,'no se publican sus variables',{'text-anchor':'middle','font-size':12,
                                             fill:'#969CA6'});
-  /* ---- ablandamiento quimico: area 600, no es nuestra ---- */
-  marco(664,84,592,300,'Chemical softener');
-  T(960,230,'area 600 - sin variables publicadas',
-    {'text-anchor':'middle','font-size':13,fill:'#7A889E'});
+  /* ---- ablandamiento quimico: area 600, no es nuestra ----
+     Va a la DERECHA del suavizador 3, que acaba en x=944. El marco
+     empezaba en 664 y se comia esa columna entera. */
+  marco(956,84,300,300,'Chemical softener');
+  T(1150,124,'Run conditions',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+  ['Process request','Dosing level','Motors & valves','pH.6.01&5&7','E-STOP']
+    .forEach((t,i)=>{
+      elS('rect',{x:1052,y:136+i*24,width:188,height:20,rx:3,fill:'#D7DBE1',
+                  stroke:'#C6CBD3','stroke-width':1,opacity:.5},ov);
+      T(1146,150+i*24,t,{'text-anchor':'middle','font-size':11,fill:'#7A889E'});
+    });
+  T(1150,278,'Off/OnTime',{'text-anchor':'middle','font-size':11,fill:'#626A78'});
+  ['-- Seg / off','-- Seg / on'].forEach((t,i)=>{
+    elS('rect',{x:1052,y:288+i*26,width:188,height:22,rx:3,fill:'#F5F6F8',
+                stroke:'#C6CBD3','stroke-width':1,opacity:.6},ov);
+    T(1146,304+i*26,t,{'text-anchor':'middle','font-size':11,
+                       'font-family':'Consolas,monospace',fill:'#7A889E'});
+  });
+  boton(1000,152,'Stop/Start','#7A889E'); boton(1000,244,'Reset','#3A4252');
+  T(1106,362,'area 600 - sin variables publicadas',
+    {'text-anchor':'middle','font-size':11,fill:'#969CA6'});
 }
 
 function enciende(id,on,malo){
@@ -1355,7 +1384,8 @@ function pintaCTR(o){
   });
   if(n) n.textContent='Pantalla CTR14 del HMI. Verde = condicion cumplida, rojo = condicion '+
     'que impide o aborta la marcha. Los tres primeros son permisivos (1 = bien) y el resto '+
-    'disparos (1 = mal); la polaridad de PSL.5.01 no esta verificada. El offset de RO1cdn '+
+    'disparos (1 = mal); la polaridad de PSL.5.01 no esta verificada. Los pulsadores '+
+    'se dibujan apagados: esta pagina no manda ordenes. El offset de RO1cdn '+
     '(DB1.228) es deducido. Los tiempos por paso (Seg) no se publican.';
 }
 
