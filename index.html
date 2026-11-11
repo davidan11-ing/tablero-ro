@@ -684,6 +684,17 @@ function pintaFiltros(e){
   if(r) r.textContent=resumen.join('   ·   ');
 }
 
+/* El HMI pone el totalizador justo debajo del caudal; aqui va bajo la
+   capsula del instrumento, con su propia clave FTxxxcum. */
+function totalizador(tag,x,y){
+  const t=txt(x,y,'','eqval',layers.instr);
+  t.setAttribute('id','cum_'+tag); t.setAttribute('font-size','9.5');
+  t.setAttribute('opacity','.85');
+  return t;
+}
+totalizador('FT501',562,145);
+totalizador('FT504',1330,75);
+
 const KPIS=[
   ['FT501','Caudal entrada','m³/h'], ['FT504','Caudal permeado','m³/h'],
   ['PT501','Presión E1','bar'], ['PT502','Presión E2','bar'],
@@ -751,6 +762,10 @@ function pinta(bruto){
       kp.classList.remove('viejo');
     }
   }
+  ['FT501','FT504'].forEach(k=>{
+    const e=document.getElementById('cum_'+k), v=obj[k+'cum'];
+    if(e && v!==undefined) e.textContent=Math.round(Number(v)).toLocaleString('es-CO')+' m³';
+  });
   marcaSiRaro('PH501', v=>v<0||v>14);
   marcaSiRaro('PH506', v=>v<0||v>14);
   pintaEquipos(obj); pintaValvulas(obj); pintaHMI(obj);
@@ -1009,10 +1024,24 @@ function dibujaRF1(){
   P('nacl',[[600,490],[600,HREG]],'brine');
   P('naclb',[[600,555],[560,555],[560,HREG]],'brine');
 
-  /* BCE-4.05A/B y BCE-4.04A/B van SIN tuberia, como en el HMI: alli se
-     dibujan sueltas, con el rotulo de su servicio al lado. No se les
-     inventa el trazado. */
+  /* BCE-4.05A/B: trazado leido del propio HMI (vertical en x=416 desde la
+     linea de fondo, ramales en y=612 y 676, descarga por x=507 hasta la
+     horizontal de y=577 que va a TAQ-4.03). */
+  P('regSuc',[[416,HREG],[416,673]],'cip');
+  P('regA',[[416,612],[445,612]],'cip');
+  P('regB',[[416,673],[445,673]],'cip');
+  P('regAd',[[479,609],[507,609],[507,577]],'cip');
+  P('regBd',[[479,673],[507,673],[507,609]],'cip');
+  P('regOut',[[507,577],[675,577]],'cip');
   txt(668,664,'Reuse Water','eqsub',gP);
+
+  /* BCE-4.04A/B: en el HMI forman un colector local entre x=1002 y x=1092
+     junto a TAQ-4.04, sin salir a ningun sitio mas. */
+  P('traSuc',[[1106,612],[1092,612],[1092,673]],'cip',true);
+  P('traA',[[1092,612],[1074,612]],'cip',true);
+  P('traB',[[1092,673],[1074,673]],'cip',true);
+  P('traAd',[[1018,609],[1002,609],[1002,673]],'cip',true);
+  P('traBd',[[1018,673],[1002,673]],'cip',true);
   txt(931,664,'TAQ-5.13','eqsub',gP);
 
   el('rect',{x:236,y:106,width:800,height:312,class:'zone'},gP);
@@ -1123,6 +1152,11 @@ function pintaRF1(o){
 
   on('r_dosA',run('BDO402A')); on('r_dosB',run('BDO402B'));
   on('r_dosh',run('BDO402A')); on('r_dosh2',run('BDO402B'));
+  on('r_regSuc',reg); on('r_regA',run('BCE405A')); on('r_regB',run('BCE405B'));
+  on('r_regAd',run('BCE405A')); on('r_regBd',run('BCE405B')); on('r_regOut',reg);
+  const tra=run('BCE404A')||run('BCE404B');
+  on('r_traSuc',tra); on('r_traA',run('BCE404A')); on('r_traB',run('BCE404B'));
+  on('r_traAd',run('BCE404A')); on('r_traBd',run('BCE404B'));
 }
 function on(id,v){const p=document.getElementById('pp_'+id); if(p) p.classList.toggle('on',!!v);}
 function nivel(id,v,max){
