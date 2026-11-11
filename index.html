@@ -939,27 +939,48 @@ function dibujaRF1(){
   const gP=el('g',{}), gE=el('g',{}), gS=el('g',{}), gI=el('g',{}), gV=el('g',{});
   L={pipes:gP,equip:gE,instr:gI,valves:gV};
   const P=(id,pts,fl,thin)=>pipe('r_'+id,pts,fl,thin);
-  /* sobre(): tuberia por ENCIMA del vaso, para los tramos que lo cruzan */
   const S=(id,pts,fl,thin)=>{L.pipes=gS; const r=pipe('r_'+id,pts,fl,thin);
                              L.pipes=gP; return r;};
   const GEO={};
-  const HFEED=118, HDREN=442, HCOL=474, HREG=506;
+  const HFEED=72, HDREN=442, HCOL=474, HREG=506;
 
-  P('feedh',[[40,590],[40,HFEED],[1100,HFEED]],'feed');
-  P('drenh',[[300,HDREN],[1161,HDREN]],'drain');
-  P('colh',[[300,HCOL],[1161,HCOL]],'perm');
-  P('regh',[[300,HREG],[1161,HREG]],'cip');
-  P('ro1',[[1161,HCOL],[1222,HCOL],[1222,400]],'perm');
-  P('dren',[[1161,HDREN],[1222,HDREN],[1222,398]],'drain');
+  /* terminador: punta y rotulo. Una linea o conecta, o acaba asi. */
+  const fin=(x,y,dir,label)=>{
+    const d = dir==='up'   ? 'M'+x+','+y+' l-5,9 h10 z'
+            : dir==='right'? 'M'+x+','+y+' l-9,-5 v10 z'
+            :                'M'+x+','+y+' l9,-5 v10 z';
+    el('path',{d:d,fill:'var(--trazo)',opacity:.55},gP);
+    const t=txt(dir==='up'?x:(dir==='right'?x-5:x+5),
+                dir==='up'?y-7:y-10, label,'arrowlbl',gP);
+    t.setAttribute('text-anchor', dir==='right'?'end':(dir==='up'?'middle':'start'));
+  };
 
-  /* --- por suavizador: cada ramal muere en su valvula, donde la pone el HMI --- */
+  /* --- alimentacion: TAQ-4.01 -> BCE-4.01A/B -> colector --- */
+  P('feedS',[[148,695],[112,695],[112,600]],'feed');
+  P('feedSa',[[112,607],[99,607]],'feed');
+  P('feedSb',[[112,668],[99,668]],'feed');
+  P('feedDa',[[82,588],[40,588]],'feed');
+  P('feedDb',[[82,649],[40,649]],'feed');
+  P('feedR',[[40,649],[40,HFEED]],'feed');
+  P('feedh',[[40,HFEED],[928,HFEED]],'feed');
+
+  /* --- colectores, recortados a lo que de verdad reciben --- */
+  P('drenh',[[453,HDREN],[1161,HDREN]],'drain');
+  P('colh',[[435,HCOL],[1161,HCOL]],'perm');
+  P('regh',[[255,HREG],[1000,HREG]],'cip');
+  P('dren',[[1161,HDREN],[1226,HDREN]],'drain');
+  P('ro1',[[1161,HCOL],[1226,HCOL]],'perm');
+  fin(1232,HDREN,'left','a drenaje');
+  fin(1232,HCOL,'left','a RO1');
+
+  /* --- por suavizador --- */
   SF.forEach(s=>{
-    const cx=s.cx, iz=cx-96, de=cx+96;
-    const c=t=>CEN(t);
+    const cx=s.cx, iz=cx-96, de=cx+96, c=t=>CEN(t);
     P('ent'+s.n,[[c(s.ent).x,HFEED],[c(s.ent).x,c(s.ent).y-11]],'feed');
     S('ent'+s.n+'b',[[c(s.ent).x,c(s.ent).y+11],[c(s.ent).x,212]],'feed');
-    P('ven'+s.n,[[c(s.vent).x,c(s.vent).y-11],[c(s.vent).x,96]],'drain',true);
-    S('ven'+s.n+'b',[[c(s.vent).x,c(s.vent).y+11],[c(s.vent).x,156]],'drain',true);
+    S('ven'+s.n,[[c(s.vent).x,c(s.vent).y+11],[c(s.vent).x,156]],'drain',true);
+    P('ven'+s.n+'b',[[c(s.vent).x,c(s.vent).y-11],[c(s.vent).x,100]],'drain',true);
+    fin(c(s.vent).x,96,'up','venteo');
     S('dsu'+s.n,[[c(s.dsup).x,c(s.dsup).y],[de,c(s.dsup).y]],'drain',true);
     P('dsu'+s.n+'b',[[de,c(s.dsup).y],[de,HDREN]],'drain',true);
     S('din'+s.n,[[c(s.dinf).x,c(s.dinf).y],[de,c(s.dinf).y]],'drain',true);
@@ -972,25 +993,32 @@ function dibujaRF1(){
     P('ein'+s.n+'b',[[iz+18,398],[iz+18,HREG]],'cip',true);
   });
 
-  P('dosA',[[142,348],[112,348]],'dos');
-  P('dosB',[[142,409],[112,409]],'dos');
-  P('dosh',[[52,348],[40,348]],'dos');
-  P('dosh2',[[52,409],[40,409]],'dos');
-  P('nacl',[[714,488],[714,509],[630,509]],'brine');
-  P('naclb',[[714,540],[714,574],[630,574]],'brine');
-  P('naclh',[[570,509],[540,509],[540,HREG]],'brine');
-  P('reg',[[1106,600],[520,600],[520,609],[492,609]],'cip');
-  P('regb',[[520,600],[520,673],[492,673]],'cip');
-  P('regs',[[432,609],[404,609],[404,HREG]],'cip');
-  P('tra',[[1175,600],[1175,609],[1076,609]],'cip',true);
-  P('trab',[[1175,600],[1175,670],[1076,670]],'cip',true);
-  P('feedT',[[211,535],[211,500],[112,500],[112,607]],'feed');
-  P('feedT2',[[112,607],[112,668]],'feed');
+  /* --- dosificacion NaHSO3: TAQ-4.02 -> BDO-4.02A/B -> colector --- */
+  P('dosA',[[142,348],[93,348]],'dos');
+  P('dosB',[[142,409],[93,409]],'dos');
+  P('dosh',[[71,348],[40,348]],'dos');
+  P('dosh2',[[71,409],[40,409]],'dos');
 
-  el('rect',{x:236,y:86,width:800,height:330,class:'zone'},gP);
-  txt(636,80,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',gP);
-  txt(1240,392,'a RO1','arrowlbl',gP).setAttribute('text-anchor','end');
-  txt(1240,412,'a drenaje','arrowlbl',gP).setAttribute('text-anchor','end');
+  /* --- salmuera: TAQ-4.03 -> BCE-4.03A/B -> colector de regeneracion --- */
+  P('naclA',[[675,509],[617,509]],'brine');
+  P('naclB',[[675,574],[617,574]],'brine');
+  P('nacl',[[600,490],[600,470],[540,470],[540,HREG]],'brine');
+  P('naclb',[[600,555],[560,555],[560,470]],'brine');
+
+  /* --- agua de regeneracion: TAQ-4.04 -> BCE-4.05A/B --- */
+  P('reg',[[1106,600],[520,600],[520,609],[479,609]],'cip');
+  P('regb',[[520,609],[520,673],[479,673]],'cip');
+  P('regs',[[462,590],[462,560],[404,560],[404,HREG]],'cip');
+  P('regs2',[[462,651],[440,651],[440,560]],'cip');
+
+  /* --- transferencia: TAQ-4.04 -> BCE-4.04A/B --- */
+  P('traA',[[1106,609],[1063,609]],'cip',true);
+  P('traB',[[1106,670],[1063,670]],'cip',true);
+  P('tra',[[1029,609],[1000,609],[1000,HREG]],'cip',true);
+  P('trab',[[1029,670],[1000,670],[1000,609]],'cip',true);
+
+  el('rect',{x:236,y:106,width:800,height:312,class:'zone'},gP);
+  txt(636,100,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',gP);
 
   const tanque=(id,x,y,w,hh,lab,sub,col)=>{GEO[id]={y:y,h:hh};
     return tank(id,x,y,w,hh,lab,sub,.45,col);};
@@ -1065,7 +1093,9 @@ function pintaRF1(o){
                 !(bitDe(Number(o[t]),M.FLT)||bitDe(Number(o[t]),M.Bad));
   const run=t=>o[t]!==undefined && bitDe(Number(o[t]),M.Runing);
   const feed=run('BCE401A')||run('BCE401B');
-  on('r_feedT',feed); on('r_feedT2',run('BCE401B')); on('r_feedh',feed);
+  on('r_feedS',feed); on('r_feedSa',run('BCE401A')); on('r_feedSb',run('BCE401B'));
+  on('r_feedDa',run('BCE401A')); on('r_feedDb',run('BCE401B'));
+  on('r_feedR',feed); on('r_feedh',feed);
   let hayCol=false, hayDren=false, hayReg=false;
   SF.forEach(s=>{
     const e=feed&&ab(s.ent), sa=ab(s.sal);
@@ -1084,10 +1114,14 @@ function pintaRF1(o){
   on('r_drenh',hayDren); on('r_dren',hayDren&&ab('FCV423'));
   const nacl=run('BCE403A')||run('BCE403B');
   const reg=run('BCE405A')||run('BCE405B');
-  on('r_nacl',run('BCE403A')); on('r_naclb',run('BCE403B')); on('r_naclh',nacl);
-  on('r_reg',reg); on('r_regb',run('BCE405B')); on('r_regs',reg);
+  on('r_naclA',run('BCE403A')); on('r_naclB',run('BCE403B'));
+  on('r_nacl',nacl); on('r_naclb',run('BCE403B'));
+  on('r_reg',reg); on('r_regb',run('BCE405B'));
+  on('r_regs',reg); on('r_regs2',run('BCE405B'));
   on('r_regh',hayReg||reg||nacl);
-  on('r_tra',run('BCE404A')); on('r_trab',run('BCE404B'));
+  const tra=run('BCE404A')||run('BCE404B');
+  on('r_traA',run('BCE404A')); on('r_traB',run('BCE404B'));
+  on('r_tra',tra); on('r_trab',run('BCE404B'));
   on('r_dosA',run('BDO402A')); on('r_dosB',run('BDO402B'));
   on('r_dosh',run('BDO402A')); on('r_dosh2',run('BDO402B'));
 }
