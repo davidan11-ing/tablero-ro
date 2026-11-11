@@ -917,39 +917,61 @@ const SF=[{n:'01',cx:357,ent:'FCV401',sal:'FCV405',dsup:'FCV402',esup:'FCV403',
           {n:'03',cx:973,ent:'FCV415',sal:'FCV419',dsup:'FCV416',esup:'FCV417',
            dinf:'FCV418',einf:'FCV420',vent:'FCV421',f:'F3'}];
 
+/* Vaso del suavizador, version sencilla: en RF1 las valvulas van ENCIMA del
+   recipiente, como en el HMI, y el lecho de resina punteado competia con
+   ellas. Contorno, banda de lecho y rotulo de estado, nada mas. */
+function vaso(id,cx,ytop,w,h,num){
+  const x=cx-w/2, r=Math.min(16,w/3);
+  const g=el('g',{class:'eq',id:'eq_'+id},L.equip);
+  el('path',{d:`M${x},${ytop+r} Q${x},${ytop} ${cx},${ytop} Q${x+w},${ytop} ${x+w},${ytop+r} V${ytop+h-r} Q${x+w},${ytop+h} ${cx},${ytop+h} Q${x},${ytop+h} ${x},${ytop+h-r} Z`,
+    fill:'var(--panel)',stroke:'var(--accent)','stroke-width':1.6,class:'body glow'},g);
+  el('rect',{x:x+7,y:ytop+56,width:w-14,height:h-96,rx:8,fill:'var(--resina)',
+             stroke:'var(--resinapt)','stroke-width':1,opacity:.75,class:'lecho'},g);
+  txt(cx,ytop+26,num,'eqsub',g);
+  txt(cx,ytop+h-14,'','svlbl',g).setAttribute('id','sv_'+id);
+  return g;
+}
+
 function dibujaRF1(){
   const lienzo=document.getElementById('rf1'); if(!lienzo) return;
   const antesS=SVGACT, antesL=L;
   SVGACT=lienzo;
-  L={pipes:el('g',{}),equip:el('g',{}),instr:el('g',{}),valves:el('g',{})};
+  const gP=el('g',{}), gE=el('g',{}), gS=el('g',{}), gI=el('g',{}), gV=el('g',{});
+  L={pipes:gP,equip:gE,instr:gI,valves:gV};
   const P=(id,pts,fl,thin)=>pipe('r_'+id,pts,fl,thin);
+  /* sobre(): tuberia por ENCIMA del vaso, para los tramos que lo cruzan */
+  const S=(id,pts,fl,thin)=>{L.pipes=gS; const r=pipe('r_'+id,pts,fl,thin);
+                             L.pipes=gP; return r;};
   const GEO={};
-
-  /* alturas de los tres colectores horizontales */
   const HFEED=118, HDREN=442, HCOL=474, HREG=506;
 
-  /* --- colectores --- */
-  P('feedh',[[40,590],[40,HFEED],[1078,HFEED]],'feed');
-  P('drenh',[[262,HDREN],[1161,HDREN]],'drain');
-  P('colh',[[262,HCOL],[1161,HCOL]],'perm');
-  P('regh',[[262,HREG],[1161,HREG]],'cip');
+  P('feedh',[[40,590],[40,HFEED],[1100,HFEED]],'feed');
+  P('drenh',[[300,HDREN],[1161,HDREN]],'drain');
+  P('colh',[[300,HCOL],[1161,HCOL]],'perm');
+  P('regh',[[300,HREG],[1161,HREG]],'cip');
   P('ro1',[[1161,HCOL],[1222,HCOL],[1222,400]],'perm');
   P('dren',[[1161,HDREN],[1222,HDREN],[1222,398]],'drain');
 
-  /* --- por cada suavizador --- */
+  /* --- por suavizador: cada ramal muere en su valvula, donde la pone el HMI --- */
   SF.forEach(s=>{
     const cx=s.cx, iz=cx-96, de=cx+96;
-    P('ent'+s.n,[[iz,HFEED],[iz,190],[iz,218],[cx-70,218]],'feed');
-    P('ven'+s.n,[[cx+52,154],[cx+52,126]],'drain',true);
-    P('dsu'+s.n,[[cx+70,190],[de,190],[de,HDREN]],'drain',true);
-    P('esu'+s.n,[[cx-70,278],[iz,278],[iz,HREG]],'cip',true);
-    P('din'+s.n,[[cx+70,278],[de,278],[de,HDREN]],'drain',true);
-    P('bajo'+s.n,[[cx,363],[cx,396]],'perm');
-    P('sal'+s.n,[[cx,396],[de,396],[de,HCOL]],'perm');
-    P('ein'+s.n,[[cx,396],[iz,396],[iz,HREG]],'cip',true);
+    const c=t=>CEN(t);
+    P('ent'+s.n,[[c(s.ent).x,HFEED],[c(s.ent).x,c(s.ent).y-11]],'feed');
+    S('ent'+s.n+'b',[[c(s.ent).x,c(s.ent).y+11],[c(s.ent).x,212]],'feed');
+    P('ven'+s.n,[[c(s.vent).x,c(s.vent).y-11],[c(s.vent).x,96]],'drain',true);
+    S('ven'+s.n+'b',[[c(s.vent).x,c(s.vent).y+11],[c(s.vent).x,156]],'drain',true);
+    S('dsu'+s.n,[[c(s.dsup).x,c(s.dsup).y],[de,c(s.dsup).y]],'drain',true);
+    P('dsu'+s.n+'b',[[de,c(s.dsup).y],[de,HDREN]],'drain',true);
+    S('din'+s.n,[[c(s.dinf).x,c(s.dinf).y],[de,c(s.dinf).y]],'drain',true);
+    P('din'+s.n+'b',[[de,c(s.dinf).y],[de,HDREN]],'drain',true);
+    S('sal'+s.n,[[cx,363],[cx,390],[de-18,390],[de-18,c(s.sal).y]],'perm');
+    P('sal'+s.n+'b',[[de-18,c(s.sal).y],[de-18,HCOL]],'perm');
+    S('esu'+s.n,[[c(s.esup).x,c(s.esup).y],[iz,c(s.esup).y]],'cip',true);
+    P('esu'+s.n+'b',[[iz,c(s.esup).y],[iz,HREG]],'cip',true);
+    S('ein'+s.n,[[c(s.einf).x,c(s.einf).y],[c(s.einf).x,398],[iz+18,398]],'cip',true);
+    P('ein'+s.n+'b',[[iz+18,398],[iz+18,HREG]],'cip',true);
   });
 
-  /* --- quimicos y regeneracion --- */
   P('dosA',[[142,348],[112,348]],'dos');
   P('dosB',[[142,409],[112,409]],'dos');
   P('dosh',[[52,348],[40,348]],'dos');
@@ -965,13 +987,11 @@ function dibujaRF1(){
   P('feedT',[[211,535],[211,500],[112,500],[112,607]],'feed');
   P('feedT2',[[112,607],[112,668]],'feed');
 
-  /* --- zona --- */
-  el('rect',{x:236,y:86,width:800,height:330,class:'zone'},L.pipes);
-  txt(636,80,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',L.pipes);
-  txt(1240,392,'a RO1','arrowlbl',L.pipes).setAttribute('text-anchor','end');
-  txt(1240,412,'a drenaje','arrowlbl',L.pipes).setAttribute('text-anchor','end');
+  el('rect',{x:236,y:86,width:800,height:330,class:'zone'},gP);
+  txt(636,80,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',gP);
+  txt(1240,392,'a RO1','arrowlbl',gP).setAttribute('text-anchor','end');
+  txt(1240,412,'a drenaje','arrowlbl',gP).setAttribute('text-anchor','end');
 
-  /* --- tanques --- */
   const tanque=(id,x,y,w,hh,lab,sub,col)=>{GEO[id]={y:y,h:hh};
     return tank(id,x,y,w,hh,lab,sub,.45,col);};
   tanque('r_taq401',142,535,138,152,'TAQ-4.01','Permeado MBR','var(--cfeed)');
@@ -979,9 +999,8 @@ function dibujaRF1(){
   tanque('r_taq403',675,488,79,112,'TAQ-4.03','Salmuera NaCl','var(--cbrine)');
   tanque('r_taq404',1106,537,138,152,'TAQ-4.04','Regeneracion','var(--ccip)');
   window.__GEO=GEO;
-  SF.forEach(s=>softener('r_sf'+s.n,s.cx,154,140,209,s.n));
+  SF.forEach(s=>vaso('r_sf'+s.n,s.cx,154,140,209,s.n));
 
-  /* --- equipos --- */
   const bomba=(t,lab,sub)=>{const c=CEN(t); pump('r_'+t,c.x,c.y,lab,sub);};
   bomba('BCE401A','BCE-4.01A','Alimentacion'); bomba('BCE401B','BCE-4.01B','Alimentacion');
   bomba('BCE403A','BCE-4.03A','NaCl');         bomba('BCE403B','BCE-4.03B','NaCl');
@@ -990,23 +1009,16 @@ function dibujaRF1(){
   ['BDO402A','BDO402B'].forEach(t=>{const c=CEN(t);
     dospump('r_'+t,c.x,c.y,'BDO-4.'+t.slice(4));});
 
-  /* --- valvulas, ya sobre las lineas --- */
-  const vlv=(t,x,y,vert)=>{
-    const g=valve('r_'+t,x,y,t.replace('FCV4','FCV-4.'),vert,0);
+  /* --- las 23 valvulas, en la posicion exacta que ocupan en el HMI --- */
+  RF1.filter(q=>q.k==='v').forEach(q=>{
+    const c=CEN(q.t);
+    const vert = !(q.t==='FCV406'||q.t==='FCV413'||q.t==='FCV420');
+    const g=valve('r_'+q.t,c.x,c.y,q.t.replace('FCV4','FCV-4.'),vert,0);
     const e=g.querySelector('text');
-    if(e){e.setAttribute('x',x); e.setAttribute('y',y-13);
+    if(e){e.setAttribute('x',c.x); e.setAttribute('y',c.y-13);
           e.setAttribute('text-anchor','middle');}
-  };
-  SF.forEach(s=>{
-    const cx=s.cx, iz=cx-96, de=cx+96;
-    vlv(s.ent,iz,190,true); vlv(s.esup,iz,278,true); vlv(s.einf,iz,396-0,false);
-    vlv(s.dsup,de,190,true); vlv(s.dinf,de,278,true); vlv(s.sal,de,396,false);
-    vlv(s.vent,cx+52,140,true);
   });
-  vlv('FCV423',1161,HDREN,false);
-  vlv('FCV422',1161,HCOL,false);
 
-  /* --- instrumentos --- */
   instr('LT-4.01',205,505,211,535,'m','in2_');
   instr('LT-4.04',1169,507,1175,537,'m','in2_');
   instr('ORP-4.01',92,92,40,118,'mV','in2_');
@@ -1056,11 +1068,13 @@ function pintaRF1(o){
   let hayCol=false, hayDren=false, hayReg=false;
   SF.forEach(s=>{
     const e=feed&&ab(s.ent), sa=ab(s.sal);
-    on('r_ent'+s.n,e);
-    on('r_bajo'+s.n,sa); on('r_sal'+s.n,sa);
-    on('r_dsu'+s.n,ab(s.dsup)); on('r_din'+s.n,ab(s.dinf));
-    on('r_esu'+s.n,ab(s.esup)); on('r_ein'+s.n,ab(s.einf));
-    on('r_ven'+s.n,ab(s.vent));
+    on('r_ent'+s.n,e); on('r_ent'+s.n+'b',e);
+    on('r_sal'+s.n,sa); on('r_sal'+s.n+'b',sa);
+    on('r_dsu'+s.n,ab(s.dsup)); on('r_dsu'+s.n+'b',ab(s.dsup));
+    on('r_din'+s.n,ab(s.dinf)); on('r_din'+s.n+'b',ab(s.dinf));
+    on('r_esu'+s.n,ab(s.esup)); on('r_esu'+s.n+'b',ab(s.esup));
+    on('r_ein'+s.n,ab(s.einf)); on('r_ein'+s.n+'b',ab(s.einf));
+    on('r_ven'+s.n,ab(s.vent)); on('r_ven'+s.n+'b',ab(s.vent));
     hayCol = hayCol||sa;
     hayDren = hayDren||ab(s.dsup)||ab(s.dinf);
     hayReg = hayReg||ab(s.esup)||ab(s.einf);
