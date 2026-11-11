@@ -985,7 +985,9 @@ function dibujaRF1(){
     P('dsu'+s.n+'b',[[de,c(s.dsup).y],[de,HDREN]],'drain',true);
     S('din'+s.n,[[c(s.dinf).x,c(s.dinf).y],[de,c(s.dinf).y]],'drain',true);
     P('din'+s.n+'b',[[de,c(s.dinf).y],[de,HDREN]],'drain',true);
-    S('sal'+s.n,[[cx,363],[cx,390],[de-18,390],[de-18,c(s.sal).y]],'perm');
+    /* el efluente sale en horizontal de su valvula y despues baja, igual
+       que los drenajes: antes rodeaba por el fondo del vaso y subia. */
+    S('sal'+s.n,[[c(s.sal).x,c(s.sal).y],[de-18,c(s.sal).y]],'perm');
     P('sal'+s.n+'b',[[de-18,c(s.sal).y],[de-18,HCOL]],'perm');
     S('esu'+s.n,[[c(s.esup).x,c(s.esup).y],[iz,c(s.esup).y]],'cip',true);
     P('esu'+s.n+'b',[[iz,c(s.esup).y],[iz,HREG]],'cip',true);
