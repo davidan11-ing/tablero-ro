@@ -1015,9 +1015,10 @@ function dibujaRF1(){
      aqui: se lleva a su propio ramal de coleccion. */
   P('ro1',[[1120,HCOL],[1196,HCOL]],'perm');
   P('colV',[[1120,HDREN],[1120,452],[1151,452]],'drain',true);
-  P('colOut',[[1172,452],[1196,452]],'drain',true);
+  /* FCV-4.22 no sale del dibujo: descarga DENTRO de TAQ-4.04, que es el
+     tanque de agua de regeneracion. La 4.23 si va a drenaje. */
+  P('colOut',[[1172,452],[1200,452],[1200,537]],'cip',true);
   fin(1200,343,'right','a drenaje');
-  fin(1200,452,'right','a coleccion');
   fin(1200,HCOL,'right','a RO1');
 
   /* --- por suavizador --- */
