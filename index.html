@@ -588,6 +588,9 @@ instr('FI-4.04',1365,360,1365,415,'L/h');
 
 /* ---------------- VÁLVULAS ---------------- */
 valve('FCV501',1240,190,'FCV-5.01',true);
+/* FCV-5.01 no tiene palabra de estado: es una valvula proporcional.
+   Se muestra su posicion en % y se abre/cierra a partir de ella. */
+txt(1240,212,'','eqval',layers.valves).setAttribute('id','pos_FCV501');
 valve('FCV502',1302,205,'FCV-5.02',true);
 valve('VA501',1200,250,'VA-5.01',false);
 valve('FCV424',356,490,'FCV-4.24',true,-22);
@@ -632,7 +635,8 @@ const EQUIPOS={
   BDO503A:'dp1c',   BDO503B:'dp1c',
   BDO407:'bdoA',    BDO408:'bdoB'
 };
-const VALVULAS={FCV502:'FCV502'};
+/* Estas tres ya estaban dibujadas en el P&ID pero nadie las alimentaba. */
+const VALVULAS={FCV502:'FCV502', FCV424:'FCV424', FCV425:'FCV425'};
 /* Equipos que ya traen su bit real: dejan de depender del paso de RO1. */
 const conDatoReal=new Set();
 
@@ -653,6 +657,13 @@ function pintaEquipos(o){
   }
 }
 function pintaValvulas(o){
+  if(o.FCV501pos!==undefined){
+    const v=Number(o.FCV501pos), t=document.getElementById('pos_FCV501');
+    if(t) t.textContent=v.toFixed(0)+' %';
+    const g=document.getElementById('vl_FCV501');
+    if(g){ g.classList.add('viva');
+           g.classList.toggle('abierta',v>5); g.classList.toggle('cerrada',v<=5); }
+  }
   for(const k in VALVULAS){
     if(o[k]===undefined) continue;
     const w=Number(o[k]), g=document.getElementById('vl_'+VALVULAS[k]); if(!g) continue;
@@ -984,13 +995,18 @@ function dibujaRF1(){
   P('feedh',[[40,HFEED],[928,HFEED]],'feed');
 
   /* --- colectores, recortados a lo que de verdad reciben --- */
-  P('drenh',[[453,HDREN],[1161,HDREN]],'drain');
-  P('colh',[[435,HCOL],[1161,HCOL]],'perm');
+  P('drenh',[[453,HDREN],[1120,HDREN]],'drain');
+  P('colh',[[435,HCOL],[1120,HCOL]],'perm');
   P('regh',[[255,HREG],[1010,HREG]],'cip');
-  P('dren',[[1161,HDREN],[1196,HDREN]],'drain');
-  P('ro1',[[1161,HCOL],[1196,HCOL]],'perm');
-  fin(1200,HDREN,'right','a drenaje');
-  fin(1200,HCOL,'right','a RO1');
+  /* FCV-4.23 (drenaje comun) y FCV-4.22 (coleccion) estan donde las pone
+     el HMI, 100 px por encima de los colectores: la linea sube a buscarlas
+     y sale por detras de cada una. Antes quedaban colgadas. */
+  P('drenV',[[1120,HDREN],[1120,343],[1151,343]],'drain');
+  P('dren',[[1172,343],[1196,343]],'drain');
+  P('colV',[[1120,HCOL],[1120,452],[1151,452]],'perm');
+  P('ro1',[[1172,452],[1196,452]],'perm');
+  fin(1200,343,'right','a drenaje');
+  fin(1200,452,'right','a RO1');
 
   /* --- por suavizador --- */
   SF.forEach(s=>{
@@ -1141,8 +1157,10 @@ function pintaRF1(o){
     hayDren = hayDren||ab(s.dsup)||ab(s.dinf);
     hayReg = hayReg||ab(s.esup)||ab(s.einf);
   });
-  on('r_colh',hayCol&&ab('FCV422')); on('r_ro1',hayCol&&ab('FCV422'));
-  on('r_drenh',hayDren); on('r_dren',hayDren&&ab('FCV423'));
+  on('r_colh',hayCol); on('r_colV',hayCol&&ab('FCV422'));
+  on('r_ro1',hayCol&&ab('FCV422'));
+  on('r_drenh',hayDren); on('r_drenV',hayDren&&ab('FCV423'));
+  on('r_dren',hayDren&&ab('FCV423'));
   on('r_naclA',run('BCE403A')); on('r_naclB',run('BCE403B'));
   on('r_nacl',nacl); on('r_naclb',run('BCE403B'));
 
