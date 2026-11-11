@@ -172,6 +172,7 @@
   .valve.viva{opacity:1;}
   .valve.abierta path{fill:var(--ok); stroke:var(--ok);}
   .valve.cerrada path{fill:var(--panel2); stroke:var(--dim);}
+  .valve.manual path{fill:var(--violet); stroke:var(--violet);}
   .valve.falla path{fill:var(--bad); stroke:var(--bad);}
   .svlbl{fill:var(--dim); font-size:8px; text-anchor:middle; paint-order:stroke;
          stroke:var(--panel2); stroke-width:3px; stroke-linejoin:round;}
@@ -659,7 +660,8 @@ function pintaEquipos(o){
 function pintaValvulas(o){
   if(o.FCV501pos!==undefined){
     const v=Number(o.FCV501pos), t=document.getElementById('pos_FCV501');
-    if(t) t.textContent=v.toFixed(0)+' %';
+    /* el crudo roza el cero por debajo y salia '-0 %' */
+    if(t) t.textContent=Math.max(0,v).toFixed(0)+' %';
     const g=document.getElementById('vl_FCV501');
     if(g){ g.classList.add('viva');
            g.classList.toggle('abierta',v>5); g.classList.toggle('cerrada',v<=5); }
@@ -668,10 +670,14 @@ function pintaValvulas(o){
     if(o[k]===undefined) continue;
     const w=Number(o[k]), g=document.getElementById('vl_'+VALVULAS[k]); if(!g) continue;
     const falla=bitDe(w,M.FLT)||bitDe(w,M.Bad), abierta=bitDe(w,M.OPN);
+    /* Sin RMT la valvula esta en local: se marca en violeta, igual que los
+       equipos. Un equipo en manual no esta RDY y tumba el cdn[10]. */
+    const manual=!bitDe(w,M.RMT)&&!falla;
     g.classList.add('viva');
     g.classList.toggle('falla',falla);
-    g.classList.toggle('abierta',abierta&&!falla);
-    g.classList.toggle('cerrada',!abierta&&!falla);
+    g.classList.toggle('manual',manual);
+    g.classList.toggle('abierta',abierta&&!falla&&!manual);
+    g.classList.toggle('cerrada',!abierta&&!falla&&!manual);
   }
 }
 
@@ -1108,8 +1114,9 @@ function pintaRF1(o){
       const ab=bitDe(w,M.OPN);
       g.classList.add('viva');
       g.classList.toggle('falla',falla);
-      g.classList.toggle('abierta',ab&&!falla);
-      g.classList.toggle('cerrada',!ab&&!falla);
+      g.classList.toggle('manual',manual&&!falla);
+      g.classList.toggle('abierta',ab&&!falla&&!manual);
+      g.classList.toggle('cerrada',!ab&&!falla&&!manual);
     }else{
       const g=document.getElementById('eq_r_'+q.t); if(!g) return;
       g.classList.toggle('run',bitDe(w,M.Runing)&&!falla);
