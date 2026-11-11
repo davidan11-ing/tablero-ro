@@ -246,6 +246,41 @@
          padding:5px 0; border-top:1px solid #C6CBD3;}
   .mv .f b{font-family:Consolas,monospace;}
   .mv .pie{padding:9px 13px; background:#D7DBE1; font-size:11px; color:#626A78;}
+
+  /* ---- panel de alarmas ---- */
+  .alrm{background:var(--panel); border:1px solid var(--border); border-radius:9px;
+        margin-bottom:14px; overflow:hidden;}
+  .alrm.hay{border-color:#C9A227;}
+  .alrm.grave{border-color:#C0392B;}
+  .alrm > summary{display:flex; align-items:center; gap:10px; padding:10px 14px;
+        cursor:pointer; list-style:none; font-size:12.5px;}
+  .alrm > summary::-webkit-details-marker{display:none;}
+  .alrm .pt{width:9px; height:9px; border-radius:50%; background:var(--ok); flex:0 0 auto;}
+  .alrm.hay .pt{background:#C9A227;}
+  .alrm.grave .pt{background:#C0392B; animation:lat 1.1s ease-in-out infinite;}
+  @keyframes lat{0%,100%{opacity:1} 50%{opacity:.25}}
+  .alrm .tit{font-weight:600; text-transform:uppercase; letter-spacing:.6px;
+        color:var(--dim); font-size:11.5px;}
+  .alrm .resumen{margin-left:auto; font-family:Consolas,monospace; font-size:12px;
+        color:var(--ok); text-align:right;}
+  .alrm.hay .resumen{color:#8A6D0B; font-weight:700;}
+  .alrm.grave .resumen{color:#C0392B; font-weight:700;}
+  .alrm .acc{display:flex; gap:6px; margin-left:12px;}
+  .alrm .acc button{padding:4px 10px; font-size:11px; font-weight:500;
+        background:transparent; color:var(--dim); border:1px solid var(--line);}
+  .alrm .acc button.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+  .alrm .cuerpo{padding:0 14px 12px; display:grid; gap:7px;}
+  .ev{display:flex; align-items:baseline; gap:10px; font-size:12.5px;
+      padding:7px 10px; border-radius:6px; background:var(--panel2);
+      border-left:3px solid var(--line);}
+  .ev.trip{border-left-color:#C0392B;}
+  .ev.aviso{border-left-color:#C9A227;}
+  .ev .h{font-family:Consolas,monospace; font-size:11px; color:var(--dim); flex:0 0 auto;}
+  .ev .q{flex:1 1 auto;}
+  .ev .n{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;
+         color:var(--dim); flex:0 0 auto;}
+  .ev.ida{opacity:.5;}
+  .alrm .vacio{font-size:12px; color:var(--dim); padding:2px 0 4px;}
 </style>
 </head>
 <body>
@@ -277,10 +312,19 @@
 <main>
   <div class="tira" id="tira"></div>
 
+
+  <details class="alrm" id="boxAlrm" open>
+    <summary>
+      <span class="pt"></span><span class="tit">Alarmas</span>
+      <span class="resumen" id="alrmRes">sin alarmas activas</span>
+      <span class="acc">
+        <button id="btnSon" title="Avisar con un sonido al aparecer una alarma">Sonido</button>
+        <button id="btnAck">Silenciar</button>
+      </span>
+    </summary>
+    <div class="cuerpo" id="alrmLista"></div>
+  </details>
   <div class="par">
-    <div class="caja alarma" id="alarma">
-      <div class="linea"><span>Alarmas</span><span class="res" id="alarmaTxt">sin alarmas activas</span></div>
-    </div>
     <details class="plegable caja" id="boxPasos">
       <summary><span>Secuencia RO1</span><span class="res" id="resPaso">sin datos</span></summary>
       <div class="pasos" id="pasos"></div>
@@ -785,7 +829,7 @@ function pinta(bruto){
   });
   marcaSiRaro('PH501', v=>v<0||v>14);
   marcaSiRaro('PH506', v=>v<0||v>14);
-  pintaEquipos(obj); pintaValvulas(obj); pintaHMI(obj);
+  pintaEquipos(obj); pintaValvulas(obj); pintaHMI(obj); evaluaAlarmas(obj);
   if(obj.step!==undefined) pintaEstado(obj);
   ultimoDato=Date.now();
 }
@@ -835,16 +879,16 @@ function pintaEstado(e){
   document.getElementById('resEstado').textContent = res || ('paso '+paso);
 }
 
+/* Si algun dia el CBOX publica en permoda/planta/alarma, su aviso entra
+   en el mismo registro que las alarmas que deduce el tablero. */
 function pintaAlarma(a){
-  const d=document.getElementById('alarma'), t=document.getElementById('alarmaTxt');
-  if(a && a.activa){
-    const causa=a.texto||CAUSAS[a.codigo]||('código '+a.codigo);
-    t.textContent='⚠ '+causa+' · paso '+a.paso+(a.ts?' · '+a.ts:'');
-    d.classList.add('ver');
-  } else {
-    t.textContent='sin alarmas activas';
-    d.classList.remove('ver');
-  }
+  if(!(a && a.activa)) return;
+  const causa=a.texto||CAUSAS[a.codigo]||('codigo '+a.codigo);
+  registro.unshift({h:hhmm(), q:'Aviso del PLC: '+causa+
+    (a.paso!==undefined?(' · paso '+a.paso):''), n:'trip', viva:true,
+    id:'ext'+Date.now()});
+  registro=registro.slice(0,40);
+  silenciado=false; pita(true); pintaPanelAlarmas();
 }
 
 /* Un dato viejo en pantalla engaña más que no tener dato. */
@@ -1475,6 +1519,150 @@ document.getElementById('tabs').addEventListener('click',e=>{
 
 montaCTR();
 function pintaHMI(o){ pintaRF1(o); pintaCTR(o); }
+
+
+/* ============================================================
+   Alarmas derivadas del propio PLC. No hay un topico de alarmas:
+   todo sale de los bits que ya llegan, y por eso las condiciones
+   son las que usa FC3, no umbrales inventados aqui.
+   ============================================================ */
+const bitCdn=(o,m)=> o.RO1cdn!==undefined && bitDe(Number(o.RO1cdn),m);
+const hayCdn=o=> o.RO1cdn!==undefined;
+
+const REGLAS=[
+  /* disparos: el bit en alto significa que algo va mal */
+  {id:'estop',  n:'trip',  t:'PARO DE EMERGENCIA',
+   f:o=>bitCdn(o,15)},
+  {id:'arranq', n:'trip',  t:'Fallo de arranque de bomba',
+   f:o=>bitCdn(o,3)},
+  {id:'filtro', n:'trip',  t:'Regeneracion vencida — filter timeout',
+   f:o=>bitCdn(o,0)},
+  {id:'ph',     n:'trip',  t:'pH de alimentacion fuera de rango',
+   f:o=>bitCdn(o,1)},
+  {id:'orp',    n:'trip',  t:'ORP alto — cloro en la alimentacion',
+   f:o=>bitCdn(o,2)},
+  {id:'psl',    n:'trip',  t:'Presostato de baja succion (PSL-5.01)',
+   f:o=>bitCdn(o,11)},
+  /* permisivos: el bit en bajo significa que falta un permiso */
+  {id:'nivel',  n:'aviso', t:'Sin permiso de nivel — LT-4.01 bajo o TAQ-5.07 lleno',
+   f:o=>hayCdn(o) && !bitCdn(o,8)},
+  {id:'quimic', n:'aviso', t:'Nivel bajo de quimicos',
+   f:o=>hayCdn(o) && !bitCdn(o,9)},
+  {id:'listos', n:'aviso', t:'Equipos no listos — alguno en manual o en fallo',
+   f:o=>hayCdn(o) && !bitCdn(o,10)},
+  /* estado de la planta */
+  {id:'parada',
+   /* parar a mano no es una alarma: el codigo 13 es "parada manual" */
+   n:o=>Number(o.codigo)===13?'aviso':'trip',
+   t:o=>'RO1 parada — ultima causa: '+
+      (CAUSAS[Number(o.codigo)]||('codigo '+o.codigo)),
+   f:o=>o.step!==undefined && Number(o.step)===0},
+  /* equipos con fallo propio */
+  {id:'equipo', n:'trip',  t:o=>'Fallo en '+equiposEnFallo(o).join(', '),
+   f:o=>equiposEnFallo(o).length>0},
+];
+
+function equiposEnFallo(o){
+  const mal=[];
+  for(const k in o){
+    if(!/^(BCE|BDO|FCV)\d/.test(k)) continue;
+    const w=Number(o[k]);
+    if(!Number.isFinite(w)) continue;
+    if(bitDe(w,M.FLT)||bitDe(w,M.Bad)) mal.push(k);
+  }
+  return mal.slice(0,6);
+}
+
+let activas={}, registro=[], sonido=false, silenciado=false;
+try{ sonido = localStorage.getItem('ro_sonido')==='1'; }catch(e){}
+
+function pita(grave){
+  if(!sonido||silenciado) return;
+  try{
+    const A=window.AudioContext||window.webkitAudioContext; if(!A) return;
+    const c=pita.ctx||(pita.ctx=new A());
+    if(c.state==='suspended') c.resume();
+    const t0=c.currentTime;
+    [0,.22].slice(0,grave?2:1).forEach((d,i)=>{
+      const os=c.createOscillator(), g=c.createGain();
+      os.type='sine'; os.frequency.value = grave?(i?700:880):620;
+      g.gain.setValueAtTime(0,t0+d);
+      g.gain.linearRampToValueAtTime(.18,t0+d+.02);
+      g.gain.exponentialRampToValueAtTime(.001,t0+d+.19);
+      os.connect(g); g.connect(c.destination);
+      os.start(t0+d); os.stop(t0+d+.2);
+    });
+  }catch(e){}
+}
+
+function hhmm(){ const d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+
+         ':'+String(d.getSeconds()).padStart(2,'0'); }
+
+function evaluaAlarmas(o){
+  const ahora={};
+  REGLAS.forEach(r=>{ let v=false;
+    try{ v=!!r.f(o); }catch(e){}
+    if(v) ahora[r.id]={t:(typeof r.t==='function')?r.t(o):r.t,
+                       n:(typeof r.n==='function')?r.n(o):r.n}; });
+  let nuevaGrave=false, nueva=false;
+  for(const id in ahora){
+    if(!activas[id]){
+      nueva=true; if(ahora[id].n==='trip') nuevaGrave=true;
+      registro.unshift({h:hhmm(), q:ahora[id].t, n:ahora[id].n, viva:true, id});
+    }
+  }
+  for(const id in activas){
+    if(!ahora[id]){
+      const e=registro.find(x=>x.id===id&&x.viva);
+      if(e){ e.viva=false; e.q+='  ·  resuelta '+hhmm(); }
+    }
+  }
+  activas=ahora;
+  registro=registro.slice(0,40);
+  if(nueva){ silenciado=false; pita(nuevaGrave); }
+  pintaPanelAlarmas();
+}
+
+function pintaPanelAlarmas(){
+  const caja=document.getElementById('boxAlrm');
+  const res=document.getElementById('alrmRes');
+  const lista=document.getElementById('alrmLista');
+  if(!caja||!res||!lista) return;
+  const ids=Object.keys(activas);
+  const graves=ids.filter(i=>activas[i].n==='trip').length;
+  caja.classList.toggle('hay', ids.length>0 && graves===0);
+  caja.classList.toggle('grave', graves>0);
+  res.textContent = ids.length===0 ? 'sin alarmas activas'
+    : (graves>0 ? graves+' alarma'+(graves>1?'s':'') : ids.length+' aviso'+(ids.length>1?'s':''));
+  document.title = (ids.length? (graves>0?'\u25CF ':'\u25B2 ')+ids.length+' \u00b7 ':'')
+    + '\u00d3smosis Inversa Permoda';
+  while(lista.firstChild) lista.removeChild(lista.firstChild);
+  if(!registro.length){
+    const p=document.createElement('div'); p.className='vacio';
+    p.textContent='Sin eventos desde que se abrio el tablero.';
+    lista.appendChild(p); return;
+  }
+  registro.forEach(e=>{
+    const d=document.createElement('div');
+    d.className='ev '+e.n+(e.viva?'':' ida');
+    const h=document.createElement('span'); h.className='h'; h.textContent=e.h;
+    const q=document.createElement('span'); q.className='q'; q.textContent=e.q;
+    const n=document.createElement('span'); n.className='n';
+    n.textContent=e.viva?(e.n==='trip'?'activa':'aviso'):'resuelta';
+    d.appendChild(h); d.appendChild(q); d.appendChild(n); lista.appendChild(d);
+  });
+}
+
+document.getElementById('btnSon').onclick=e=>{
+  e.preventDefault(); sonido=!sonido;
+  e.target.classList.toggle('on',sonido);
+  try{ localStorage.setItem('ro_sonido', sonido?'1':'0'); }catch(x){}
+  if(sonido) pita(false);          /* prueba, y de paso desbloquea el audio */
+};
+document.getElementById('btnAck').onclick=e=>{ e.preventDefault(); silenciado=true; };
+document.getElementById('btnSon').classList.toggle('on',sonido);
+pintaPanelAlarmas();
 
 </script>
 </body>
