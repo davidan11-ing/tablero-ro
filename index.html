@@ -1009,10 +1009,16 @@ function dibujaRF1(){
      y sale por detras de cada una. Antes quedaban colgadas. */
   P('drenV',[[1120,HDREN],[1120,343],[1151,343]],'drain');
   P('dren',[[1172,343],[1196,343]],'drain');
-  P('colV',[[1120,HCOL],[1120,452],[1151,452]],'perm');
-  P('ro1',[[1172,452],[1196,452]],'perm');
+  /* El servicio va de los efluentes directo a RO1: la valvula de esa linea
+     es FCV-5.02, que esta en el diagrama de Proceso. Con la planta
+     produciendo, FCV-4.22 (coleccion) esta CERRADA, asi que no cuelga de
+     aqui: se lleva a su propio ramal de coleccion. */
+  P('ro1',[[1120,HCOL],[1196,HCOL]],'perm');
+  P('colV',[[1120,HDREN],[1120,452],[1151,452]],'drain',true);
+  P('colOut',[[1172,452],[1196,452]],'drain',true);
   fin(1200,343,'right','a drenaje');
-  fin(1200,452,'right','a RO1');
+  fin(1200,452,'right','a coleccion');
+  fin(1200,HCOL,'right','a RO1');
 
   /* --- por suavizador --- */
   SF.forEach(s=>{
@@ -1164,8 +1170,8 @@ function pintaRF1(o){
     hayDren = hayDren||ab(s.dsup)||ab(s.dinf);
     hayReg = hayReg||ab(s.esup)||ab(s.einf);
   });
-  on('r_colh',hayCol); on('r_colV',hayCol&&ab('FCV422'));
-  on('r_ro1',hayCol&&ab('FCV422'));
+  on('r_colh',hayCol); on('r_ro1',hayCol);
+  on('r_colV',hayDren&&ab('FCV422')); on('r_colOut',hayDren&&ab('FCV422'));
   on('r_drenh',hayDren); on('r_drenV',hayDren&&ab('FCV423'));
   on('r_dren',hayDren&&ab('FCV423'));
   on('r_naclA',run('BCE403A')); on('r_naclB',run('BCE403B'));
