@@ -1009,17 +1009,11 @@ function dibujaRF1(){
   P('nacl',[[600,490],[600,HREG]],'brine');
   P('naclb',[[600,555],[560,555],[560,HREG]],'brine');
 
-  /* --- agua de regeneracion: TAQ-4.04 -> BCE-4.05A/B --- */
-  P('reg',[[1106,600],[520,600],[520,609],[479,609]],'cip');
-  P('regb',[[520,609],[520,673],[479,673]],'cip');
-  P('regs',[[462,590],[462,HREG]],'cip');
-  P('regs2',[[462,651],[440,651],[440,HREG]],'cip');
-
-  /* --- transferencia: TAQ-4.04 -> BCE-4.04A/B --- */
-  P('traA',[[1106,609],[1063,609]],'cip',true);
-  P('traB',[[1106,670],[1063,670]],'cip',true);
-  P('tra',[[1029,609],[1000,609],[1000,HREG]],'cip',true);
-  P('trab',[[1029,670],[1000,670],[1000,609]],'cip',true);
+  /* BCE-4.05A/B y BCE-4.04A/B van SIN tuberia, como en el HMI: alli se
+     dibujan sueltas, con el rotulo de su servicio al lado. No se les
+     inventa el trazado. */
+  txt(668,664,'Reuse Water','eqsub',gP);
+  txt(931,664,'TAQ-5.13','eqsub',gP);
 
   el('rect',{x:236,y:106,width:800,height:312,class:'zone'},gP);
   txt(636,100,'SUAVIZADORES DE INTERCAMBIO IONICO','zonelbl',gP);
@@ -1101,8 +1095,8 @@ function pintaRF1(o){
      regeneracion solo lleva agua si empuja alguna de sus bombas. */
   const nacl=run('BCE403A')||run('BCE403B');
   const reg=run('BCE405A')||run('BCE405B');
-  const tra=run('BCE404A')||run('BCE404B');
-  const fuenteReg = nacl||reg||tra;
+  /* BCE-4.04 (a TAQ-5.13) no alimenta este colector: es otro servicio. */
+  const fuenteReg = nacl||reg;
   on('r_feedS',feed); on('r_feedSa',run('BCE401A')); on('r_feedSb',run('BCE401B'));
   on('r_feedDa',run('BCE401A')); on('r_feedDb',run('BCE401B'));
   on('r_feedR',feed); on('r_feedh',feed);
@@ -1124,11 +1118,9 @@ function pintaRF1(o){
   on('r_drenh',hayDren); on('r_dren',hayDren&&ab('FCV423'));
   on('r_naclA',run('BCE403A')); on('r_naclB',run('BCE403B'));
   on('r_nacl',nacl); on('r_naclb',run('BCE403B'));
-  on('r_reg',reg); on('r_regb',run('BCE405B'));
-  on('r_regs',reg); on('r_regs2',run('BCE405B'));
+
   on('r_regh',hayReg&&fuenteReg);
-  on('r_traA',run('BCE404A')); on('r_traB',run('BCE404B'));
-  on('r_tra',tra); on('r_trab',run('BCE404B'));
+
   on('r_dosA',run('BDO402A')); on('r_dosB',run('BDO402B'));
   on('r_dosh',run('BDO402A')); on('r_dosh2',run('BDO402B'));
 }
