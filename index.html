@@ -247,40 +247,31 @@
   .mv .f b{font-family:Consolas,monospace;}
   .mv .pie{padding:9px 13px; background:#D7DBE1; font-size:11px; color:#626A78;}
 
-  /* ---- panel de alarmas ---- */
-  .alrm{background:var(--panel); border:1px solid var(--border); border-radius:9px;
-        margin-bottom:14px; overflow:hidden;}
+  /* ---- caja de alarmas: una mas de la fila, no una banda aparte ---- */
   .alrm.hay{border-color:#C9A227;}
   .alrm.grave{border-color:#C0392B;}
-  .alrm > summary{display:flex; align-items:center; gap:10px; padding:10px 14px;
-        cursor:pointer; list-style:none; font-size:12.5px;}
-  .alrm > summary::-webkit-details-marker{display:none;}
-  .alrm .pt{width:9px; height:9px; border-radius:50%; background:var(--ok); flex:0 0 auto;}
-  .alrm.hay .pt{background:#C9A227;}
-  .alrm.grave .pt{background:#C0392B; animation:lat 1.1s ease-in-out infinite;}
+  .alrm > summary .pt{width:8px; height:8px; border-radius:50%; background:var(--ok);
+        flex:0 0 auto; margin-right:1px;}
+  .alrm.hay > summary .pt{background:#C9A227;}
+  .alrm.grave > summary .pt{background:#C0392B; animation:lat 1.1s ease-in-out infinite;}
   @keyframes lat{0%,100%{opacity:1} 50%{opacity:.25}}
-  .alrm .tit{font-weight:600; text-transform:uppercase; letter-spacing:.6px;
-        color:var(--dim); font-size:11.5px;}
-  .alrm .resumen{margin-left:auto; font-family:Consolas,monospace; font-size:12px;
-        color:var(--ok); text-align:right;}
-  .alrm.hay .resumen{color:#8A6D0B; font-weight:700;}
-  .alrm.grave .resumen{color:#C0392B; font-weight:700;}
-  .alrm .acc{display:flex; gap:6px; margin-left:12px;}
-  .alrm .acc button{padding:4px 10px; font-size:11px; font-weight:500;
+  .alrm.hay > summary .res{color:#8A6D0B; font-weight:700;}
+  .alrm.grave > summary .res{color:#C0392B; font-weight:700;}
+  .alrm .acc{display:flex; gap:6px; margin-bottom:9px;}
+  .alrm .acc button{padding:3px 9px; font-size:10.5px; font-weight:500;
         background:transparent; color:var(--dim); border:1px solid var(--line);}
   .alrm .acc button.on{background:var(--accent); color:#fff; border-color:var(--accent);}
-  .alrm .cuerpo{padding:0 14px 12px; display:grid; gap:7px;}
-  .ev{display:flex; align-items:baseline; gap:10px; font-size:12.5px;
-      padding:7px 10px; border-radius:6px; background:var(--panel2);
+  .alrm .cuerpo{display:grid; gap:5px; max-height:210px; overflow-y:auto;}
+  .ev{display:flex; align-items:baseline; gap:7px; font-size:11.5px;
+      padding:5px 8px; border-radius:5px; background:var(--panel2);
       border-left:3px solid var(--line);}
   .ev.trip{border-left-color:#C0392B;}
   .ev.aviso{border-left-color:#C9A227;}
-  .ev .h{font-family:Consolas,monospace; font-size:11px; color:var(--dim); flex:0 0 auto;}
-  .ev .q{flex:1 1 auto;}
-  .ev .n{font-size:10.5px; text-transform:uppercase; letter-spacing:.5px;
-         color:var(--dim); flex:0 0 auto;}
-  .ev.ida{opacity:.5;}
-  .alrm .vacio{font-size:12px; color:var(--dim); padding:2px 0 4px;}
+  .ev .h{font-family:Consolas,monospace; font-size:10px; color:var(--dim); flex:0 0 auto;}
+  .ev .q{flex:1 1 auto; line-height:1.3;}
+  .ev .n{display:none;}
+  .ev.ida{opacity:.45;}
+  .alrm .vacio{font-size:11.5px; color:var(--dim);}
 </style>
 </head>
 <body>
@@ -313,18 +304,16 @@
   <div class="tira" id="tira"></div>
 
 
-  <details class="alrm" id="boxAlrm" open>
-    <summary>
-      <span class="pt"></span><span class="tit">Alarmas</span>
-      <span class="resumen" id="alrmRes">sin alarmas activas</span>
-      <span class="acc">
+  <div class="par">
+    <details class="plegable caja alrm" id="boxAlrm">
+      <summary><span class="pt"></span><span>Alarmas</span>
+        <span class="res" id="alrmRes">sin alarmas activas</span></summary>
+      <div class="acc">
         <button id="btnSon" title="Avisar con un sonido al aparecer una alarma">Sonido</button>
         <button id="btnAck">Silenciar</button>
-      </span>
-    </summary>
-    <div class="cuerpo" id="alrmLista"></div>
-  </details>
-  <div class="par">
+      </div>
+      <div class="cuerpo" id="alrmLista"></div>
+    </details>
     <details class="plegable caja" id="boxPasos">
       <summary><span>Secuencia RO1</span><span class="res" id="resPaso">sin datos</span></summary>
       <div class="pasos" id="pasos"></div>
